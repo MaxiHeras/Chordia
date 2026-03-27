@@ -272,12 +272,29 @@ def inject_custom_css() -> None:
     }
     .rel-comp-q-mayor { background: #8fd18f !important; color: #052e16; }
     .rel-comp-q-menor { background: #fef08a !important; color: #713f12; }
-    .rel-comp-q-dism { background: #fdba74 !important; color: #7c2d12; }
-    .rel-comp-q-aum { background: #93c5fd !important; color: #1e3a8a; }
+    .rel-comp-q-dism { background: #fdba74 !important; color: #0f172a; }
+    .rel-comp-q-aum { background: #93c5fd !important; color: #0f172a; }
     .rel-comp-q-same { background: #94a3b8 !important; color: #0f172a; }
     .rel-comp-compact .rel-comp-table {
         font-size: 0.78rem;
         min-width: 0;
+    }
+    .rel-comp-compact .rel-comp-col-corner {
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        font-size: 0.65rem;
+        padding: 4px 2px !important;
+    }
+    .rel-comp-compact .rel-comp-col-label {
+        width: 54px !important;
+        min-width: 54px !important;
+        max-width: 54px !important;
+    }
+    .rel-comp-compact .rel-comp-q {
+        font-size: 0.68rem;
+        letter-spacing: -0.03em;
+        white-space: nowrap;
     }
     .rel-comp-compact .rel-comp-table th,
     .rel-comp-compact .rel-comp-table td {

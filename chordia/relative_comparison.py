@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from chordia.scales import ROMAN_DEGREES, build_scale
+from chordia.scales import ROMAN_DEGREES, build_scale, roots_for_alteration
 from chordia.scales import _note_pitch_class  # noqa: SLF001
 
 # Patrones en semitonos (7 intervalos entre grados consecutivos).
@@ -125,26 +125,39 @@ def relative_major_option(minor_root: str, root_options: list[str]) -> str:
     return pick_root_for_pc(maj_pc, root_options)
 
 
-# 12 tónicas por convención de alteración (para que SI exista la relativa en el mismo listado).
-_REL_ROOTS_FLAT = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
-_REL_ROOTS_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+def rel_comp_root_options(filtro: str, maj_root: str, min_root: str) -> list[str]:
+    """
+    Igual que Diccionario: solo las 7 tónicas del filtro (Nat./Sost./Bem.),
+    más las notas necesarias para mostrar el par relativo (p. ej. F# con A en Nat.).
+    """
+    base = roots_for_alteration(filtro)
+    out: list[str] = list(base)
+    seen = set(base)
+    for n in (
+        relative_minor_from_major(maj_root),
+        relative_major_from_minor(min_root),
+        maj_root,
+        min_root,
+    ):
+        if n and n not in seen:
+            out.append(n)
+            seen.add(n)
+    return out
 
 
-def rel_comp_root_options(filtro: str) -> list[str]:
-    if filtro == "Sost.":
-        return list(_REL_ROOTS_SHARP)
-    return list(_REL_ROOTS_FLAT)
-
-
-def sync_minor_from_major_for_options(major_root: str, filtro: str) -> str:
-    opts = rel_comp_root_options(filtro)
+def sync_minor_from_major_for_options(major_root: str, filtro: str, min_root: str) -> str:
     spelled = relative_minor_from_major(major_root)
+    opts = rel_comp_root_options(filtro, major_root, min_root)
+    if spelled in opts:
+        return spelled
     return pick_root_for_pc(_note_pitch_class(spelled), opts)
 
 
-def sync_major_from_minor_for_options(minor_root: str, filtro: str) -> str:
-    opts = rel_comp_root_options(filtro)
+def sync_major_from_minor_for_options(minor_root: str, filtro: str, maj_root: str) -> str:
     spelled = relative_major_from_minor(minor_root)
+    opts = rel_comp_root_options(filtro, maj_root, minor_root)
+    if spelled in opts:
+        return spelled
     return pick_root_for_pc(_note_pitch_class(spelled), opts)
 
 

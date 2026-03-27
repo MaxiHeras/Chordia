@@ -23,8 +23,8 @@ from chordia.harmonization import detect_harmonization_columns
 from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, build_scales_pdf, build_selection_pdf
 from chordia.relative_comparison import (
     rel_comp_root_options,
-    sync_major_from_minor_for_options,
-    sync_minor_from_major_for_options,
+    relative_major_from_minor,
+    relative_minor_from_major,
 )
 from chordia.scales import detect_scale_columns, roots_for_alteration
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
@@ -226,34 +226,28 @@ def render_relative_comparison_sidebar() -> None:
         st.session_state.filtro_alteracion_rel = "Nat."
 
     filt = st.session_state.filtro_alteracion_rel
-    opts = rel_comp_root_options(filt)
-    sig = (filt, tuple(opts))
-    if st.session_state.get("_rel_comp_last_opts_sig") != sig:
-        st.session_state._rel_comp_last_opts_sig = sig
-        if st.session_state.rel_comp_maj_root not in opts:
-            st.session_state.rel_comp_maj_root = opts[0]
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
-            st.session_state.rel_comp_maj_root, filt
-        )
+    base = roots_for_alteration(filt)
+    if st.session_state.get("_rel_comp_filt") != filt:
+        st.session_state._rel_comp_filt = filt
+        st.session_state.rel_comp_maj_root = base[0]
+        st.session_state.rel_comp_min_root = relative_minor_from_major(base[0])
 
-    if st.session_state.rel_comp_maj_root not in opts:
-        st.session_state.rel_comp_maj_root = opts[0]
-    if st.session_state.rel_comp_min_root not in opts:
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
-            st.session_state.rel_comp_maj_root, filt
-        )
+    maj = st.session_state.rel_comp_maj_root
+    mn = st.session_state.rel_comp_min_root
+    opts = rel_comp_root_options(filt, maj, mn)
+    if maj not in opts:
+        st.session_state.rel_comp_maj_root = base[0]
+        maj = st.session_state.rel_comp_maj_root
+    if mn not in opts:
+        st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+        mn = st.session_state.rel_comp_min_root
+    opts = rel_comp_root_options(filt, maj, mn)
 
     def _on_rel_major() -> None:
-        f = st.session_state.filtro_alteracion_rel
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
-            st.session_state.rel_comp_maj_root, f
-        )
+        st.session_state.rel_comp_min_root = relative_minor_from_major(st.session_state.rel_comp_maj_root)
 
     def _on_rel_minor() -> None:
-        f = st.session_state.filtro_alteracion_rel
-        st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(
-            st.session_state.rel_comp_min_root, f
-        )
+        st.session_state.rel_comp_maj_root = relative_major_from_minor(st.session_state.rel_comp_min_root)
 
     st.selectbox(
         "Raíz modo mayor",
