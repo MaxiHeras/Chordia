@@ -91,7 +91,8 @@ def _join_note_and_quality(note: str, quality_token: str) -> str:
         return note
     if re.search(r"[A-G]", q):
         return q
-    if q.lower() in {"maj", "major", "mayor"}:
+    if q in {"M", "Maj", "MAJ"} or q.lower() in {"major", "mayor"}:
+        # Mayor: se muestra solo la nota.
         return note
     return f"{note}{q}"
 
@@ -119,9 +120,12 @@ def render_harmonization_result(
     )
     st.markdown("**Acordes de la escala armonizada**")
 
-    items = ['<div class="harmony-grid">']
+    items = ['<div class="harmony-degrees-row">']
     for i, deg in enumerate(ROMAN_DEGREES[:-1]):
         items.append(f'<div class="harmony-degree">{deg}</div>')
+    items.append("</div>")
+    items.append('<div class="harmony-chords-row">')
+    for i, _ in enumerate(ROMAN_DEGREES[:-1]):
         items.append(f'<div class="harmony-chord">{chords[i]}</div>')
     items.append("</div>")
     st.markdown("".join(items), unsafe_allow_html=True)

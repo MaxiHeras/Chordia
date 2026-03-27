@@ -71,11 +71,18 @@ def inject_custom_css() -> None:
     .scale-structure-caption {
         margin-top: 26px;
     }
-    .harmony-grid {
+    .harmony-degrees-row {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px 10px;
+        margin-top: 8px;
+        margin-bottom: 4px;
+    }
+    .harmony-chords-row {
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 8px 10px;
-        margin-top: 8px;
+        margin-top: 0;
         margin-bottom: 8px;
     }
     .harmony-degree {
