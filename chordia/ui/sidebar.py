@@ -24,8 +24,8 @@ from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, 
 from chordia.relative_comparison import (
     rel_comp_pair_is_consistent,
     rel_comp_root_options,
-    relative_major_from_minor,
-    relative_minor_from_major,
+    sync_major_from_minor_for_options,
+    sync_minor_from_major_for_options,
 )
 from chordia.scales import detect_scale_columns, roots_for_alteration
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
@@ -223,16 +223,18 @@ def render_relative_comparison_sidebar() -> None:
     if st.session_state.get("_rel_comp_filt_marker") != filt:
         st.session_state._rel_comp_filt_marker = filt
         st.session_state.rel_comp_maj_root = base[0]
-        st.session_state.rel_comp_min_root = relative_minor_from_major(base[0])
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(base[0], filt, base[0])
         st.session_state._rel_comp_last_edit = "maj"
+        st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
+        st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
 
     maj = st.session_state.rel_comp_maj_root
     mn = st.session_state.rel_comp_min_root
     if not rel_comp_pair_is_consistent(maj, mn):
         if st.session_state.get("_rel_comp_last_edit") == "min":
-            st.session_state.rel_comp_maj_root = relative_major_from_minor(mn)
+            st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn, filt, maj)
         else:
-            st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+            st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
         maj = st.session_state.rel_comp_maj_root
         mn = st.session_state.rel_comp_min_root
 
@@ -240,36 +242,55 @@ def render_relative_comparison_sidebar() -> None:
     if maj not in opts:
         st.session_state.rel_comp_maj_root = base[0]
         maj = st.session_state.rel_comp_maj_root
-        st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
         mn = st.session_state.rel_comp_min_root
         st.session_state._rel_comp_last_edit = "maj"
     if mn not in opts:
-        st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
         mn = st.session_state.rel_comp_min_root
     opts = rel_comp_root_options(filt, maj, mn)
 
-    def _on_rel_major() -> None:
-        st.session_state.rel_comp_min_root = relative_minor_from_major(st.session_state.rel_comp_maj_root)
-        st.session_state._rel_comp_last_edit = "maj"
+    if "_rel_snapshot_maj" not in st.session_state:
+        st.session_state._rel_snapshot_maj = maj
+        st.session_state._rel_snapshot_min = mn
 
-    def _on_rel_minor() -> None:
-        st.session_state.rel_comp_maj_root = relative_major_from_minor(st.session_state.rel_comp_min_root)
-        st.session_state._rel_comp_last_edit = "min"
-
+    # No usar on_change en los selectbox: en Streamlit el callback puede leer
+    # rel_comp_maj_root antes de que se aplique el valor nuevo, y la relativa
+    # menor queda calculada con la raíz mayor *anterior* (p. ej. C + C# al bajar
+    # de E mayor). Tras el selectbox de mayor, el estado ya tiene la raíz correcta.
     st.selectbox(
         "Raíz modo mayor",
         opts,
         key="rel_comp_maj_root",
-        on_change=_on_rel_major,
         help="Al cambiar, se actualiza la relativa menor.",
     )
+    maj2 = st.session_state.rel_comp_maj_root
+    if maj2 != st.session_state._rel_snapshot_maj:
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj2, filt, st.session_state.rel_comp_min_root)
+        st.session_state._rel_comp_last_edit = "maj"
+        st.session_state._rel_snapshot_maj = maj2
+        st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
+
+    opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root)
+    if st.session_state.rel_comp_min_root not in opts:
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+            st.session_state.rel_comp_maj_root, filt, st.session_state.rel_comp_min_root
+        )
+        opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root)
+
     st.selectbox(
         "Raíz modo menor (relativa)",
         opts,
         key="rel_comp_min_root",
-        on_change=_on_rel_minor,
         help="Al cambiar, se actualiza la relativa mayor.",
     )
+    mn2 = st.session_state.rel_comp_min_root
+    if mn2 != st.session_state._rel_snapshot_min:
+        st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn2, filt, st.session_state.rel_comp_maj_root)
+        st.session_state._rel_comp_last_edit = "min"
+        st.session_state._rel_snapshot_min = mn2
+        st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
+        st.rerun()
 
 
 def render_share_section() -> None:
