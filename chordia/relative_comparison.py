@@ -131,6 +131,18 @@ _MAYOR_COL_CANDIDATES = ("Mayor", "MAYOR")
 _MENOR_COL_CANDIDATES = ("Menor", "MENOR", "Menor relativa", "Relativa menor")
 
 
+def _sanitize_rel_sheet_cell(raw: object) -> str:
+    """Quita texto aclaratorio tipo 'Cb (B)' o 'C## (D)' para coincidir con las tónicas del filtro."""
+    if raw is None or (isinstance(raw, float) and pd.isna(raw)):
+        return ""
+    s = str(raw).strip()
+    if not s:
+        return ""
+    if "(" in s:
+        s = s.split("(", maxsplit=1)[0].strip()
+    return s
+
+
 def _match_sheet_column(columns: list[str], candidates: tuple[str, ...]) -> str | None:
     for raw in columns:
         norm = str(raw).strip()
@@ -158,10 +170,8 @@ def build_relative_key_pairs(df: pd.DataFrame | None) -> RelativeKeyPairs | None
         return None
     rows: list[tuple[str, str]] = []
     for _, r in df.iterrows():
-        ra = r.get(maj_c)
-        rm = r.get(men_c)
-        maj = str(ra).strip() if pd.notna(ra) else ""
-        men = str(rm).strip() if pd.notna(rm) else ""
+        maj = _sanitize_rel_sheet_cell(r.get(maj_c))
+        men = _sanitize_rel_sheet_cell(r.get(men_c))
         if maj and men:
             rows.append((maj, men))
     if not rows:
