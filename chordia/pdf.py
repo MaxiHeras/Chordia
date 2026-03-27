@@ -35,54 +35,86 @@ class ChordiaPDF(FPDF):
         self.cell(0, 5, "by Maxi Heras - Tucumán", align="R", ln=True)
 
 
+def _ensure_space(pdf: ChordiaPDF, needed_height: float, print_mode: str) -> None:
+    if print_mode == "one_per_page":
+        pdf.add_page()
+        return
+    available = pdf.h - pdf.b_margin - pdf.get_y()
+    if needed_height > available:
+        pdf.add_page()
+
+
+def _draw_chord_section(
+    pdf: ChordiaPDF,
+    row: pd.Series,
+    github_raw_base: str,
+    print_mode: str,
+) -> None:
+    diag_values: list[str] = []
+    for i in range(1, DIAGRAM_COUNT + 1):
+        val = str(row.get(f"Diagrama{i}", "nan")).strip()
+        if val.lower().endswith(".png"):
+            diag_values.append(val)
+
+    # Altura aproximada para decidir salto de página en modo continuo.
+    diag_rows = max(1, (len(diag_values) + 3) // 4) if diag_values else 1
+    needed_height = 70 + (diag_rows * 57)
+    _ensure_space(pdf, needed_height, print_mode)
+
+    pdf.set_font("helvetica", "B", 24)
+    pdf.cell(0, 20, f"{row['Raiz']} {row['Naturaleza']}", border=1, ln=True, align="C")
+    pdf.ln(8)
+    pdf.set_font("helvetica", "B", 11)
+    pdf.write(6, "Notas: ")
+    pdf.set_font("helvetica", "", 11)
+    pdf.write(6, f"{' - '.join(row_note_list(row))}\n")
+    pdf.set_font("helvetica", "B", 11)
+    pdf.write(6, "Int_IVAN: ")
+    pdf.set_font("helvetica", "", 11)
+    pdf.write(6, f"{str(row.get('Int_IVAN', 'N/A'))}\n")
+    pdf.set_font("helvetica", "B", 11)
+    pdf.write(6, "Int_TRAD: ")
+    pdf.set_font("helvetica", "", 11)
+    pdf.write(6, f"{str(row.get('Int_TRAD', 'N/A'))}\n")
+    pdf.ln(14)
+
+    x_start, gap_x, gap_y, cols, diag_w, diag_h = 15, 8, 12, 4, 38, 45
+    y_grid_top = pdf.get_y()
+    count = 0
+    for val in diag_values:
+        nat_pdf = urllib.parse.quote(str(row["Naturaleza"]))
+        img_name_pdf = val.split("/")[-1].replace("#", "SOS")
+        url_img = f"{github_raw_base}/{nat_pdf}/{img_name_pdf}"
+        try:
+            resp = requests.get(url_img, timeout=5)
+            if resp.status_code == 200:
+                img_data = resp.content
+                col = count % cols
+                fila = count // cols
+                pos_x = x_start + (col * (diag_w + gap_x))
+                pos_y = y_grid_top + (fila * (diag_h + gap_y))
+                pdf.image(BytesIO(img_data), x=pos_x, y=pos_y, w=diag_w, h=diag_h)
+                count += 1
+        except Exception:
+            continue
+
+    # Separación visual entre secciones en modo continuo.
+    if print_mode == "continuous":
+        pdf.set_y(max(pdf.get_y(), y_grid_top + (diag_rows * (diag_h + gap_y))))
+        pdf.ln(8)
+
+
 def build_selection_pdf(
     dataframe_seleccionado: pd.DataFrame,
     github_raw_base: str,
     app_public_url: str,
+    print_mode: str = "one_per_page",
 ) -> bytes:
     pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=True, margin=35)
 
     for _, row in dataframe_seleccionado.iterrows():
-        pdf.add_page()
-        pdf.set_font("helvetica", "B", 24)
-        pdf.cell(0, 20, f"{row['Raiz']} {row['Naturaleza']}", border=1, ln=True, align="C")
-        pdf.ln(8)
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Notas: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{' - '.join(row_note_list(row))}\n")
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Int_IVAN: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{str(row.get('Int_IVAN', 'N/A'))}\n")
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Int_TRAD: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{str(row.get('Int_TRAD', 'N/A'))}\n")
-        pdf.ln(14)
-
-        x_start, gap_x, gap_y, cols, diag_w, diag_h = 15, 8, 12, 4, 38, 45
-        y_grid_top = pdf.get_y()
-        count = 0
-        for i in range(1, DIAGRAM_COUNT + 1):
-            val = str(row.get(f"Diagrama{i}", "nan")).strip()
-            if val.lower().endswith(".png"):
-                nat_pdf = urllib.parse.quote(str(row["Naturaleza"]))
-                img_name_pdf = val.split("/")[-1].replace("#", "SOS")
-                url_img = f"{github_raw_base}/{nat_pdf}/{img_name_pdf}"
-                try:
-                    resp = requests.get(url_img, timeout=5)
-                    if resp.status_code == 200:
-                        img_data = resp.content
-                        col = count % cols
-                        fila = count // cols
-                        pos_x = x_start + (col * (diag_w + gap_x))
-                        pos_y = y_grid_top + (fila * (diag_h + gap_y))
-                        pdf.image(BytesIO(img_data), x=pos_x, y=pos_y, w=diag_w, h=diag_h)
-                        count += 1
-                except Exception:
-                    continue
+        _draw_chord_section(pdf, row, github_raw_base, print_mode)
 
     return pdf.output()
 
@@ -94,6 +126,7 @@ def build_scales_pdf(
     app_public_url: str,
     type_col: str,
     struct_col: str,
+    print_mode: str = "one_per_page",
 ) -> bytes:
     pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=True, margin=35)
@@ -109,14 +142,24 @@ def build_scales_pdf(
             continue
         notes = build_scale(root_note, steps)
 
-        pdf.add_page()
+        # Reserva para sección completa; si no entra en continuo, salta página.
+        _ensure_space(pdf, 86, print_mode)
         pdf.set_font("helvetica", "B", 22)
         pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C")
         pdf.ln(10)
 
-        left = 12
-        note_w = 22
-        gap_w = 10
+        # Ajuste dinámico para que siempre entren 8 notas + 7 intervalos.
+        total_width = pdf.w - pdf.l_margin - pdf.r_margin
+        left = pdf.l_margin
+        note_w = 21.0
+        gap_w = (total_width - (note_w * 8)) / 7.0
+        if gap_w < 7.0:
+            note_w = 19.0
+            gap_w = (total_width - (note_w * 8)) / 7.0
+        if gap_w < 6.0:
+            note_w = 17.5
+            gap_w = (total_width - (note_w * 8)) / 7.0
+
         y_deg = pdf.get_y()
         y_note = y_deg + 7
         y_step = y_note + 11
@@ -135,15 +178,15 @@ def build_scales_pdf(
         for i, note in enumerate(notes):
             x_note = left + i * (note_w + gap_w)
             pdf.rect(x_note, y_note, note_w, 8.5)
-            pdf.set_xy(x_note, y_note + 1.6)
-            pdf.cell(note_w, 4, note, align="C")
+            pdf.set_xy(x_note + 0.4, y_note + 1.5)
+            pdf.cell(note_w - 0.8, 4, note, align="C")
 
         # T / ST en cajas entre notas.
         pdf.set_font("helvetica", "", 8)
         pdf.set_text_color(90, 90, 90)
         for i, step in enumerate(steps):
             x_step = left + i * (note_w + gap_w) + note_w
-            pdf.rect(x_step, y_step, gap_w, 6.5)
+            pdf.rect(x_step, y_step, gap_w, 6.0)
             pdf.set_xy(x_step, y_step + 1.3)
             pdf.cell(gap_w, 3.5, step_to_label(step), align="C")
 
@@ -151,6 +194,8 @@ def build_scales_pdf(
         pdf.set_font("helvetica", "", 10)
         pdf.set_text_color(90, 90, 90)
         pdf.multi_cell(0, 6, f"Estructura: {raw_structure}")
+        if print_mode == "continuous":
+            pdf.ln(8)
 
     return pdf.output()
 

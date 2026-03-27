@@ -121,7 +121,7 @@ def step_to_label(step: int) -> str:
     if step == 1:
         return "ST"
     if step == 3:
-        return "T+ST"
+        return "1.5T"
     return str(step)
 
 

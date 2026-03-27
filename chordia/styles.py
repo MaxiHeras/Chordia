@@ -26,7 +26,15 @@ def inject_custom_css() -> None:
     }
     .scale-grid {
         display: grid;
-        grid-template-columns: repeat(15, minmax(0, 1fr));
+        grid-template-columns:
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr) minmax(0, 0.5fr)
+            minmax(0, 1fr);
         gap: 6px;
         align-items: center;
         margin-top: 10px;
@@ -52,12 +60,12 @@ def inject_custom_css() -> None:
     }
     .scale-step {
         text-align: center;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         color: #6b7280;
         font-weight: 600;
         border: 1px solid #D1D5DB;
         border-radius: 8px;
-        padding: 6px 4px;
+        padding: 4px 2px;
         background: rgba(255,255,255,0.35);
     }
     .scale-structure-caption {

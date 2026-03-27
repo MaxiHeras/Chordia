@@ -14,6 +14,8 @@ def ensure_session_defaults() -> None:
         st.session_state.pdf_data = None
     if "pdf_filename" not in st.session_state:
         st.session_state.pdf_filename = "Chordia.pdf"
+    if "pdf_print_mode" not in st.session_state:
+        st.session_state.pdf_print_mode = "one_per_page"
     if "descargado" not in st.session_state:
         st.session_state.descargado = False
     if "filtro_alteracion" not in st.session_state:

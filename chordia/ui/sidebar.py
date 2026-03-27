@@ -180,6 +180,13 @@ def render_share_section() -> None:
 
 
 def _render_pdf_controls(pdf_builder: Callable[[], bytes | None], filename: str) -> None:
+    st.radio(
+        "Modo de impresión PDF:",
+        options=["one_per_page", "continuous"],
+        format_func=lambda x: "Una hoja por tipo (por defecto)" if x == "one_per_page" else "Continuo (varios tipos por hoja)",
+        key="pdf_print_mode",
+        horizontal=False,
+    )
     st.write("")
     placeholder = st.empty()
     if st.session_state.descargado:
@@ -244,7 +251,12 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
             df_para_pdf = df_raiz[df_raiz["Naturaleza"].isin(st.session_state.seleccionados)]
             if df_para_pdf.empty:
                 return None
-            return build_selection_pdf(df_para_pdf, GITHUB_RAW_BASE, _app_public_url())
+            return build_selection_pdf(
+                df_para_pdf,
+                GITHUB_RAW_BASE,
+                _app_public_url(),
+                print_mode=st.session_state.get("pdf_print_mode", "one_per_page"),
+            )
 
         _render_pdf_controls(_build_dict_pdf, f"Acordes_{raiz_sel}.pdf")
         render_share_section()
@@ -269,6 +281,7 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
                 app_public_url=_app_public_url(),
                 type_col=type_col,
                 struct_col=struct_col,
+                print_mode=st.session_state.get("pdf_print_mode", "one_per_page"),
             )
 
         _render_pdf_controls(_build_scales_pdf, f"Escalas_{st.session_state.get('scale_root', 'C')}.pdf")
@@ -298,7 +311,12 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
         res = df[df.apply(lambda r: row_note_set(r) == notas_act, axis=1)]
         if res.empty:
             return None
-        return build_selection_pdf(res.head(1), GITHUB_RAW_BASE, _app_public_url())
+        return build_selection_pdf(
+            res.head(1),
+            GITHUB_RAW_BASE,
+            _app_public_url(),
+            print_mode=st.session_state.get("pdf_print_mode", "one_per_page"),
+        )
 
     _render_pdf_controls(_build_identifier_pdf, "Identificador_de_acorde.pdf")
     render_share_section()
