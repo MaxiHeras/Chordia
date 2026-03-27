@@ -125,7 +125,7 @@ def render_identifier_sidebar() -> None:
         st.rerun()
 
 
-def render_scales_sidebar(scales_df: pd.DataFrame | None) -> None:
+def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool = False) -> None:
     st.write("Filtrar Alteración:")
     f_cols = st.columns(3)
     nat = f_cols[0].checkbox(
@@ -159,7 +159,9 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None) -> None:
 
     root_options = roots_for_alteration(st.session_state.filtro_alteracion_escalas)
     default_index = root_options.index(st.session_state.scale_root) if st.session_state.scale_root in root_options else 0
+    prev_root = st.session_state.get("scale_root", "C")
     st.session_state.scale_root = st.selectbox("Nota Raíz:", root_options, index=default_index, key="scales_root_select")
+    root_changed = st.session_state.scale_root != prev_root
 
     if scales_df is None:
         st.warning("No se encontró la hoja de escalas en Google Sheets.")
@@ -175,8 +177,9 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None) -> None:
     scale_types = [str(x).strip() for x in scales_df[type_col].dropna().tolist() if str(x).strip()]
     scale_types = list(dict.fromkeys(scale_types))
 
-    if not st.session_state.scales_selected_types:
-        st.session_state.scales_selected_types = scale_types[:1]
+    # Igual que en Diccionario: al entrar al modo o al cambiar raíz, seleccionar todo.
+    if reset_selection or root_changed or not st.session_state.scales_selected_types:
+        st.session_state.scales_selected_types = scale_types.copy()
 
     st.multiselect("Tipo:", scale_types, key="scales_selected_types")
     c1, c2 = st.columns(2)
@@ -227,8 +230,10 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
         raiz_sel, df_raiz = render_dictionary_sidebar(df)
         render_share_section()
         return modo, raiz_sel, df_raiz
+    mode_changed = modo != modo_previo
+
     if modo == MODE_SCALES:
-        render_scales_sidebar(scales_df)
+        render_scales_sidebar(scales_df, reset_selection=mode_changed)
         render_share_section()
         return modo, "", None
     if modo == MODE_SCALE_HARMONIZATION:

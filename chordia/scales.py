@@ -80,10 +80,13 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
     if not text:
         return None
 
-    text = text.replace("TONO", "T").replace("SEMITONO", "S")
+    text = text.replace("SEMITONO", "ST").replace("SEMI TONO", "ST")
+    text = text.replace("TONO", "T")
     text = text.replace("W", "T").replace("H", "S")
-    text = text.replace("½", "S")
-    text = text.replace(",", " ").replace("-", " ")
+    text = text.replace("½", "1/2")
+    text = text.replace("Y", " ")
+    text = text.replace("T 1/2", "TS").replace("T + 1/2", "TS")
+    text = text.replace(",", " ").replace("-", " ").replace("+", " ")
     tokens = [tok for tok in re.split(r"\s+", text) if tok]
 
     values: list[int] = []
@@ -91,7 +94,7 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
         if tok == "T":
             values.append(2)
             continue
-        if tok == "S":
+        if tok in {"S", "ST"}:
             values.append(1)
             continue
         if tok == "TS":
@@ -101,7 +104,7 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
             values.append(int(tok))
             continue
         # Soporte básico de formatos fraccionados.
-        if tok in {"1/2", "0.5"}:
+        if tok in {"1/2", "0.5", ".5"}:
             values.append(1)
             continue
         if tok in {"1", "1.0"}:
