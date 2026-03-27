@@ -11,7 +11,7 @@ from fpdf import FPDF
 
 from chordia.chords import row_note_list
 from chordia.constants import DIAGRAM_COUNT
-from chordia.scales import build_scale, parse_scale_steps
+from chordia.scales import ROMAN_DEGREES, build_scale, parse_scale_steps, step_to_label
 
 
 class ChordiaPDF(FPDF):
@@ -112,23 +112,45 @@ def build_scales_pdf(
         pdf.add_page()
         pdf.set_font("helvetica", "B", 22)
         pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C")
-        pdf.ln(8)
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Grados: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, "I - II - III - IV - V - VI - VII - I\n")
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Notas: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{' - '.join(notes)}\n")
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Estructura: ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{raw_structure}\n")
-        pdf.set_font("helvetica", "B", 11)
-        pdf.write(6, "Pasos (semitonos): ")
-        pdf.set_font("helvetica", "", 11)
-        pdf.write(6, f"{' - '.join(str(x) for x in steps)}\n")
+        pdf.ln(10)
+
+        left = 12
+        note_w = 22
+        gap_w = 10
+        y_deg = pdf.get_y()
+        y_note = y_deg + 7
+        y_step = y_note + 11
+
+        # Grados romanos arriba de cada nota.
+        pdf.set_font("helvetica", "B", 9)
+        pdf.set_text_color(80, 80, 80)
+        for i, deg in enumerate(ROMAN_DEGREES):
+            x_note = left + i * (note_w + gap_w)
+            pdf.set_xy(x_note, y_deg)
+            pdf.cell(note_w, 5, deg, align="C")
+
+        # Notas en cajas.
+        pdf.set_font("helvetica", "B", 10)
+        pdf.set_text_color(20, 20, 20)
+        for i, note in enumerate(notes):
+            x_note = left + i * (note_w + gap_w)
+            pdf.rect(x_note, y_note, note_w, 8.5)
+            pdf.set_xy(x_note, y_note + 1.6)
+            pdf.cell(note_w, 4, note, align="C")
+
+        # T / ST en cajas entre notas.
+        pdf.set_font("helvetica", "", 8)
+        pdf.set_text_color(90, 90, 90)
+        for i, step in enumerate(steps):
+            x_step = left + i * (note_w + gap_w) + note_w
+            pdf.rect(x_step, y_step, gap_w, 6.5)
+            pdf.set_xy(x_step, y_step + 1.3)
+            pdf.cell(gap_w, 3.5, step_to_label(step), align="C")
+
+        pdf.set_y(y_step + 18)
+        pdf.set_font("helvetica", "", 10)
+        pdf.set_text_color(90, 90, 90)
+        pdf.multi_cell(0, 6, f"Estructura: {raw_structure}")
 
     return pdf.output()
 

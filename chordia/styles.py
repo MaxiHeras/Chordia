@@ -55,8 +55,13 @@ def inject_custom_css() -> None:
         font-size: 0.85rem;
         color: #6b7280;
         font-weight: 600;
-        border-top: 1px dashed #9CA3AF;
-        padding-top: 6px;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        padding: 6px 4px;
+        background: rgba(255,255,255,0.35);
+    }
+    .scale-structure-caption {
+        margin-top: 26px;
     }
     .c1 { grid-column: 1; } .c2 { grid-column: 2; } .c3 { grid-column: 3; } .c4 { grid-column: 4; } .c5 { grid-column: 5; }
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }

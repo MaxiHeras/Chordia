@@ -115,6 +115,16 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
     return values[:7]
 
 
+def step_to_label(step: int) -> str:
+    if step == 2:
+        return "T"
+    if step == 1:
+        return "ST"
+    if step == 3:
+        return "T+ST"
+    return str(step)
+
+
 def build_scale(root_note: str, step_pattern: list[int]) -> list[str]:
     root_letter = root_note[0]
     letter_index = _LETTERS.index(root_letter)
@@ -145,9 +155,9 @@ def render_scale_grid(notes: list[str], steps: list[int]) -> None:
     for i, note in enumerate(notes):
         html.append(f'<div class="scale-note c{2 * i + 1}">{note}</div>')
 
-    # Fila 3: estructura entre notas.
+    # Fila 3: estructura entre notas (T/ST en cuadros).
     for i, val in enumerate(steps):
-        html.append(f'<div class="scale-step c{2 * i + 2}">{val}</div>')
+        html.append(f'<div class="scale-step c{2 * i + 2}">{step_to_label(val)}</div>')
 
     html.append("</div>")
     st.markdown("".join(html), unsafe_allow_html=True)
