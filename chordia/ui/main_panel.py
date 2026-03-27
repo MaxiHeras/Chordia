@@ -6,7 +6,13 @@ import pandas as pd
 import streamlit as st
 
 from chordia.chords import row_note_set
-from chordia.constants import MODE_DICTIONARY, MODE_IDENTIFIER, ORDEN_TIPOS
+from chordia.constants import (
+    MODE_DICTIONARY,
+    MODE_IDENTIFIER,
+    MODE_SCALE_HARMONIZATION,
+    MODE_SCALES,
+    ORDEN_TIPOS,
+)
 from chordia.config import GITHUB_RAW_BASE
 from chordia.display import render_chord_detail
 
@@ -39,8 +45,22 @@ def render_main_identifier(df: pd.DataFrame) -> None:
     render_chord_detail(res.iloc[0], GITHUB_RAW_BASE)
 
 
+def render_main_scales() -> None:
+    st.header("🎼 Escalas")
+    st.info("Sección en construcción. Aquí vamos a desarrollar el módulo de escalas.")
+
+
+def render_main_scale_harmonization() -> None:
+    st.header("🎶 Armonización de escalas")
+    st.info("Sección en construcción. Aquí vamos a desarrollar la armonización de escalas.")
+
+
 def render_main(modo: str, df: pd.DataFrame, raiz_sel: str, df_raiz: pd.DataFrame | None) -> None:
     if modo == MODE_DICTIONARY and df_raiz is not None:
         render_main_dictionary(raiz_sel, df_raiz)
     elif modo == MODE_IDENTIFIER:
         render_main_identifier(df)
+    elif modo == MODE_SCALES:
+        render_main_scales()
+    elif modo == MODE_SCALE_HARMONIZATION:
+        render_main_scale_harmonization()

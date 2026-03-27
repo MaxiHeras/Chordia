@@ -9,7 +9,14 @@ import streamlit as st
 
 from chordia.chords import filter_roots_by_alteration
 from chordia.config import DEFAULT_APP_PUBLIC_URL, GITHUB_RAW_BASE
-from chordia.constants import MODE_DICTIONARY, MODE_IDENTIFIER, NOTAS_MUSICALES, ORDEN_TIPOS
+from chordia.constants import (
+    MODE_DICTIONARY,
+    MODE_IDENTIFIER,
+    MODE_SCALE_HARMONIZATION,
+    MODE_SCALES,
+    NOTAS_MUSICALES,
+    ORDEN_TIPOS,
+)
 from chordia.pdf import build_selection_pdf
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
 
@@ -130,11 +137,15 @@ def render_share_section() -> None:
 def render_sidebar(df: pd.DataFrame) -> tuple[str, str, pd.DataFrame | None]:
     """
     Devuelve (modo, raiz_sel, df_raiz).
-    En modo identificador, raiz_sel es '' y df_raiz es None.
+    En modos no-diccionario, raiz_sel es '' y df_raiz es None.
     """
     st.subheader("Seleccionar Modo")
     modo_previo = st.session_state.get("modo_actual", MODE_DICTIONARY)
-    modo = st.radio(" ", [MODE_DICTIONARY, MODE_IDENTIFIER], label_visibility="collapsed")
+    modo = st.radio(
+        " ",
+        [MODE_DICTIONARY, MODE_IDENTIFIER, MODE_SCALES, MODE_SCALE_HARMONIZATION],
+        label_visibility="collapsed",
+    )
     st.session_state.modo_actual = modo
 
     if modo != modo_previo and "u_raiz" in st.session_state:
