@@ -18,8 +18,8 @@ from chordia.constants import (
     NOTAS_MUSICALES,
     ORDEN_TIPOS,
 )
-from chordia.pdf import build_selection_pdf
-from chordia.pdf import build_info_pdf, build_scales_pdf
+from chordia.harmonization import detect_harmonization_columns
+from chordia.pdf import build_harmonization_pdf, build_scales_pdf, build_selection_pdf
 from chordia.scales import detect_scale_columns, roots_for_alteration
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
 
@@ -169,6 +169,54 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool 
     )
 
 
+def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selection: bool = False) -> None:
+    st.write("Filtrar Alteración:")
+    f_cols = st.columns(3)
+    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion_arm == "Nat."), key="arm_nat")
+    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion_arm == "Sost."), key="arm_sost")
+    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion_arm == "Bem."), key="arm_bem")
+
+    if nat and st.session_state.filtro_alteracion_arm != "Nat.":
+        st.session_state.filtro_alteracion_arm = "Nat."
+        st.rerun()
+    elif sost and st.session_state.filtro_alteracion_arm != "Sost.":
+        st.session_state.filtro_alteracion_arm = "Sost."
+        st.rerun()
+    elif bem and st.session_state.filtro_alteracion_arm != "Bem.":
+        st.session_state.filtro_alteracion_arm = "Bem."
+        st.rerun()
+    elif not nat and not sost and not bem:
+        st.session_state.filtro_alteracion_arm = "Nat."
+        st.rerun()
+
+    root_options = roots_for_alteration(st.session_state.filtro_alteracion_arm)
+    default_index = root_options.index(st.session_state.arm_root) if st.session_state.arm_root in root_options else 0
+    prev_root = st.session_state.get("arm_root", "C")
+    st.session_state.arm_root = st.selectbox("Nota Raíz:", root_options, index=default_index, key="arm_root_select")
+    root_changed = st.session_state.arm_root != prev_root
+
+    if harmony_df is None:
+        st.warning("No se encontró la hoja de armonización de escalas en Google Sheets.")
+        st.session_state.arm_selected_types = []
+        return
+
+    type_col, _, _, _ = detect_harmonization_columns(harmony_df)
+    if not type_col:
+        st.warning("No se encontró la columna de tipo en la hoja.")
+        st.session_state.arm_selected_types = []
+        return
+
+    options = [str(x).strip() for x in harmony_df[type_col].dropna().tolist() if str(x).strip()]
+    options = list(dict.fromkeys(options))
+    if reset_selection or root_changed or not st.session_state.arm_selected_types:
+        st.session_state.arm_selected_types = options.copy()
+
+    st.multiselect("Tipo:", options, key="arm_selected_types")
+    c1, c2 = st.columns(2)
+    c1.button("Todo", on_click=lambda: st.session_state.update({"arm_selected_types": options}), use_container_width=True, key="arm_select_all")
+    c2.button("Limpiar", on_click=lambda: st.session_state.update({"arm_selected_types": []}), use_container_width=True, key="arm_clear_all")
+
+
 def render_share_section() -> None:
     url = _app_public_url()
     st.write("---")
@@ -217,7 +265,11 @@ def _render_pdf_controls(pdf_builder: Callable[[], bytes | None], filename: str)
         )
 
 
-def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[str, str, pd.DataFrame | None]:
+def render_sidebar(
+    df: pd.DataFrame,
+    scales_df: pd.DataFrame | None,
+    harmony_df: pd.DataFrame | None,
+) -> tuple[str, str, pd.DataFrame | None]:
     """
     Devuelve (modo, raiz_sel, df_raiz).
     En modos no-diccionario, raiz_sel es '' y df_raiz es None.
@@ -289,17 +341,22 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
         return modo, "", None
 
     if modo == MODE_SCALE_HARMONIZATION:
-        _render_pdf_controls(
-            lambda: build_info_pdf(
-                "Armonización de escalas",
-                [
-                    "Sección en construcción.",
-                    "Próximamente se generará un PDF completo de armonización.",
-                ],
-                _app_public_url(),
-            ),
-            "Armonizacion_de_escalas.pdf",
-        )
+        render_harmonization_sidebar(harmony_df, reset_selection=mode_changed)
+        def _build_harmony_pdf() -> bytes | None:
+            if harmony_df is None:
+                return None
+            selected_types = st.session_state.get("arm_selected_types", [])
+            if not selected_types:
+                return None
+            return build_harmonization_pdf(
+                harmony_df=harmony_df,
+                selected_types=selected_types,
+                root_note=st.session_state.get("arm_root", "C"),
+                app_public_url=_app_public_url(),
+                print_mode=st.session_state.get("pdf_print_mode", "one_per_page"),
+            )
+
+        _render_pdf_controls(_build_harmony_pdf, f"Armonizacion_{st.session_state.get('arm_root', 'C')}.pdf")
         render_share_section()
         return modo, "", None
 

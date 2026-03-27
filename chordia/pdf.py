@@ -11,6 +11,11 @@ from fpdf import FPDF
 
 from chordia.chords import row_note_list
 from chordia.constants import DIAGRAM_COUNT
+from chordia.harmonization import (
+    build_harmonized_chords,
+    detect_harmonization_columns,
+    extract_harmony_tokens,
+)
 from chordia.scales import ROMAN_DEGREES, build_scale, parse_scale_steps, step_to_label
 
 
@@ -214,4 +219,97 @@ def build_info_pdf(title: str, body_lines: list[str], app_public_url: str) -> by
     pdf.set_font("helvetica", "", 12)
     for line in body_lines:
         pdf.multi_cell(0, 7, line)
+    return pdf.output()
+
+
+def build_harmonization_pdf(
+    harmony_df: pd.DataFrame,
+    selected_types: list[str],
+    root_note: str,
+    app_public_url: str,
+    print_mode: str = "one_per_page",
+) -> bytes:
+    pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=35)
+
+    type_col, struct_col, degree_cols, harmony_col = detect_harmonization_columns(harmony_df)
+    if not type_col or not struct_col:
+        return pdf.output()
+
+    for scale_type in selected_types:
+        matches = harmony_df[harmony_df[type_col].astype(str).str.strip() == str(scale_type).strip()]
+        if matches.empty:
+            continue
+        row = matches.iloc[0]
+        raw_structure = str(row.get(struct_col, "")).strip()
+        steps = parse_scale_steps(raw_structure)
+        if not steps:
+            continue
+        harmony_tokens = extract_harmony_tokens(row, degree_cols, harmony_col)
+        if len(harmony_tokens) != 7:
+            continue
+        notes, chords = build_harmonized_chords(root_note, steps, harmony_tokens)
+
+        _ensure_space(pdf, 118, print_mode)
+        pdf.set_font("helvetica", "B", 22)
+        pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C")
+        pdf.ln(9)
+
+        total_width = pdf.w - pdf.l_margin - pdf.r_margin
+        left = pdf.l_margin
+        note_w = 21.0
+        gap_w = (total_width - (note_w * 8)) / 7.0
+        if gap_w < 6.0:
+            note_w = 18.0
+            gap_w = (total_width - (note_w * 8)) / 7.0
+        y_deg = pdf.get_y()
+        y_note = y_deg + 7
+        y_step = y_note + 11
+
+        pdf.set_font("helvetica", "B", 9)
+        pdf.set_text_color(80, 80, 80)
+        for i, deg in enumerate(ROMAN_DEGREES):
+            x_note = left + i * (note_w + gap_w)
+            pdf.set_xy(x_note, y_deg)
+            pdf.cell(note_w, 5, deg, align="C")
+
+        pdf.set_font("helvetica", "B", 10)
+        pdf.set_text_color(20, 20, 20)
+        for i, note in enumerate(notes):
+            x_note = left + i * (note_w + gap_w)
+            pdf.rect(x_note, y_note, note_w, 8.5)
+            pdf.set_xy(x_note + 0.4, y_note + 1.5)
+            pdf.cell(note_w - 0.8, 4, note, align="C")
+
+        pdf.set_font("helvetica", "", 8)
+        pdf.set_text_color(90, 90, 90)
+        for i, step in enumerate(steps):
+            x_step = left + i * (note_w + gap_w) + note_w
+            pdf.rect(x_step, y_step, gap_w, 6.0)
+            pdf.set_xy(x_step, y_step + 1.3)
+            pdf.cell(gap_w, 3.5, step_to_label(step), align="C")
+
+        pdf.set_y(y_step + 18)
+        pdf.set_font("helvetica", "", 10)
+        pdf.multi_cell(0, 6, f"Estructura: {raw_structure}")
+        pdf.ln(3)
+        pdf.set_font("helvetica", "B", 11)
+        pdf.cell(0, 7, "Acordes de la escala armonizada", ln=True)
+
+        chord_y = pdf.get_y() + 2
+        chord_w = (total_width - (6 * 6)) / 7.0
+        for i in range(7):
+            x = left + i * (chord_w + 6)
+            pdf.set_font("helvetica", "B", 9)
+            pdf.set_xy(x, chord_y)
+            pdf.cell(chord_w, 4, ROMAN_DEGREES[i], align="C")
+            pdf.rect(x, chord_y + 5.5, chord_w, 8.5)
+            pdf.set_font("helvetica", "B", 9)
+            pdf.set_xy(x + 0.2, chord_y + 7.1)
+            pdf.cell(chord_w - 0.4, 4, chords[i], align="C")
+
+        pdf.set_y(chord_y + 20)
+        if print_mode == "continuous":
+            pdf.ln(8)
+
     return pdf.output()

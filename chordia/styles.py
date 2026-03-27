@@ -71,6 +71,31 @@ def inject_custom_css() -> None:
     .scale-structure-caption {
         margin-top: 26px;
     }
+    .harmony-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px 10px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+    .harmony-degree {
+        text-align: center;
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    .harmony-chord {
+        text-align: center;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        padding: 8px 4px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.5);
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .c1 { grid-column: 1; } .c2 { grid-column: 2; } .c3 { grid-column: 3; } .c4 { grid-column: 4; } .c5 { grid-column: 5; }
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }
     .c11 { grid-column: 11; } .c12 { grid-column: 12; } .c13 { grid-column: 13; } .c14 { grid-column: 14; } .c15 { grid-column: 15; }

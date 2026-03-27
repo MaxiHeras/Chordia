@@ -26,6 +26,12 @@ def ensure_session_defaults() -> None:
         st.session_state.scale_root = "C"
     if "scales_selected_types" not in st.session_state:
         st.session_state.scales_selected_types = []
+    if "filtro_alteracion_arm" not in st.session_state:
+        st.session_state.filtro_alteracion_arm = "Nat."
+    if "arm_root" not in st.session_state:
+        st.session_state.arm_root = "C"
+    if "arm_selected_types" not in st.session_state:
+        st.session_state.arm_selected_types = []
 
 
 def select_all_types(opciones: list[str]) -> None:
