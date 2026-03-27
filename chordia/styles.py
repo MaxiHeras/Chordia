@@ -257,6 +257,14 @@ def inject_custom_css() -> None:
         color: #64748b;
         font-weight: 700;
     }
+    .rel-comp-q {
+        font-weight: 700;
+    }
+    .rel-comp-q-mayor { background: #bbf7d0 !important; color: #14532d; }
+    .rel-comp-q-menor { background: #fef08a !important; color: #713f12; }
+    .rel-comp-q-dism { background: #fdba74 !important; color: #7c2d12; }
+    .rel-comp-q-aum { background: #93c5fd !important; color: #1e3a8a; }
+    .rel-comp-q-same { background: #e5e7eb !important; color: #374151; }
     .rel-comp-compact .rel-comp-table {
         font-size: 0.78rem;
         min-width: 0;

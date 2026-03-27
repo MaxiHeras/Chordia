@@ -254,19 +254,6 @@ def render_relative_comparison_sidebar() -> None:
         help="Al cambiar, se actualiza la relativa mayor.",
     )
 
-    def _rel_todo() -> None:
-        o = roots_for_alteration(st.session_state.filtro_alteracion_rel)
-        st.session_state.rel_comp_maj_root = o[0]
-        st.session_state.rel_comp_min_root = relative_minor_option(o[0], o)
-
-    def _rel_limpiar_pdf() -> None:
-        st.session_state.pdf_data = None
-        st.session_state.descargado = False
-
-    c1, c2 = st.columns(2)
-    c1.button("Todo", on_click=_rel_todo, use_container_width=True, key="rel_comp_todo")
-    c2.button("Limpiar", on_click=_rel_limpiar_pdf, use_container_width=True, key="rel_comp_clear")
-
 
 def render_share_section() -> None:
     url = _app_public_url()

@@ -16,7 +16,7 @@ from chordia.harmonization import (
     detect_harmonization_columns,
     parse_harmony_structure,
 )
-from chordia.relative_comparison import ROMAN_HEADER, build_comparison_data
+from chordia.relative_comparison import ROMAN_HEADER, build_comparison_data, quality_fill_rgb
 from chordia.scales import ROMAN_DEGREES, build_scale, detect_scale_columns, parse_scale_steps, step_to_label
 
 
@@ -228,13 +228,21 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     h_row = 6.0
     left = pdf.l_margin
 
-    def row_line(label: str, cells: list[str]) -> None:
+    def row_line(label: str, cells: list[str], *, colorize: bool = False) -> None:
         pdf.set_x(left)
         pdf.set_font("helvetica", "B", 8)
+        pdf.set_fill_color(255, 255, 255)
         pdf.cell(col_label, h_row, label, border=1)
         pdf.set_font("helvetica", "", 8)
         for c in cells:
-            pdf.cell(cell_w, h_row, c.replace("—", "-"), border=1, align="C")
+            txt = c.replace("—", "-")
+            if colorize:
+                r, g, b = quality_fill_rgb(c)
+                pdf.set_fill_color(r, g, b)
+                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=True)
+            else:
+                pdf.set_fill_color(255, 255, 255)
+                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=False)
         pdf.ln(h_row)
 
     pdf.set_font("helvetica", "B", 11)
@@ -243,7 +251,7 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     row_line("Raíz", data.major_degrees_notes)
     row_line("", [""] * 7)
     row_line("Grados", list(ROMAN_HEADER))
-    row_line("EM", data.major_harm_row)
+    row_line("EM", data.major_harm_row, colorize=True)
     pdf.ln(5)
 
     pdf.set_font("helvetica", "B", 11)
@@ -252,9 +260,9 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     row_line("Raíz", data.minor_degrees_notes)
     row_line("", [""] * 7)
     row_line("Grados", list(ROMAN_HEADER))
-    row_line("EmN", data.minor_emn)
-    row_line("EmA", data.minor_ema_display)
-    row_line("EmM", data.minor_emm_display)
+    row_line("EmN", data.minor_emn, colorize=True)
+    row_line("EmA", data.minor_ema_display, colorize=True)
+    row_line("EmM", data.minor_emm_display, colorize=True)
 
     pdf.set_font("helvetica", "I", 7)
     pdf.set_text_color(90, 90, 90)

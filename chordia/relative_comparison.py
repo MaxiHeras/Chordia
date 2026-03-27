@@ -168,6 +168,38 @@ def build_comparison_data(major_root: str, minor_root: str) -> RelativeCompariso
 ROMAN_HEADER = ROMAN_DEGREES[:-1]
 
 
+def quality_cell_class(token: str) -> str:
+    """Clases para colorear celdas de calidad (EM, EmN, EmA, EmM)."""
+    t = (token or "").strip()
+    if t in ("—", "-", "–", "\u2014"):
+        return "rel-comp-q rel-comp-q-same"
+    if t == "M":
+        return "rel-comp-q rel-comp-q-mayor"
+    if t == "m":
+        return "rel-comp-q rel-comp-q-menor"
+    if t in ("dism", "#dism"):
+        return "rel-comp-q rel-comp-q-dism"
+    if t == "aum":
+        return "rel-comp-q rel-comp-q-aum"
+    return ""
+
+
+def quality_fill_rgb(token: str) -> tuple[int, int, int]:
+    """RGB 0–255 para relleno de celdas en PDF (misma leyenda que la web)."""
+    t = (token or "").strip()
+    if t in ("—", "-", "–", "\u2014"):
+        return (229, 231, 235)
+    if t == "M":
+        return (187, 247, 208)
+    if t == "m":
+        return (254, 249, 195)
+    if t in ("dism", "#dism"):
+        return (254, 215, 170)
+    if t == "aum":
+        return (147, 197, 253)
+    return (255, 255, 255)
+
+
 def render_relative_comparison_html(data: RelativeComparisonData, compact: bool) -> str:
     wrap = "rel-comp-wrap rel-comp-compact" if compact else "rel-comp-wrap"
 
@@ -191,7 +223,9 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
         b.append("</tr>")
         b.append('<tr><th class="rel-comp-left">EM</th>')
         for t in data.major_harm_row:
-            b.append(f'<td class="rel-comp-cell">{t}</td>')
+            qc = quality_cell_class(t)
+            cls = f"rel-comp-cell {qc}".strip()
+            b.append(f'<td class="{cls}">{t}</td>')
         b.append("</tr></table>")
         return "".join(b)
 
@@ -216,7 +250,10 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
         for label, rowdata in [("EmN", data.minor_emn), ("EmA", data.minor_ema_display), ("EmM", data.minor_emm_display)]:
             b.append(f'<tr><th class="rel-comp-left">{label}</th>')
             for t in rowdata:
-                b.append(f'<td class="rel-comp-cell">{"—" if t == "—" else t}</td>')
+                display = "—" if t == "—" else t
+                qc = quality_cell_class(t)
+                cls = f"rel-comp-cell {qc}".strip()
+                b.append(f'<td class="{cls}">{display}</td>')
             b.append("</tr>")
         b.append("</table>")
         return "".join(b)
