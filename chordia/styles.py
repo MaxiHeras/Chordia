@@ -131,41 +131,61 @@ def inject_custom_css() -> None:
         .harmony-degree { font-size: 0.8rem; }
         .harmony-chord { min-height: 34px; font-size: 0.82rem; padding: 6px 3px; }
 
-        /* Vista compacta: sin scroll, ajuste proporcional del contenido principal. */
+        /* Vista compacta: sin scroll, reducción proporcional estable (sin amontonar). */
         .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
             overflow-x: visible;
         }
         .scale-grid-wrap.compact-mode .scale-grid {
             min-width: 0;
-            transform-origin: top left;
-            transform: scale(0.77);
-            width: 130%;
-            margin-bottom: -22%;
+            gap: 4px;
         }
         .harmony-wrap.compact-mode .harmony-degrees-row,
         .harmony-wrap.compact-mode .harmony-chords-row {
             min-width: 0;
-            transform-origin: top left;
-            transform: scale(0.84);
-            width: 119%;
-            margin-bottom: -10%;
+            gap: 4px 6px;
         }
-        .harmony-wrap.compact-mode .harmony-chords-row {
-            margin-top: -4%;
+        .scale-grid-wrap.compact-mode .scale-note,
+        .scale-grid-wrap.compact-mode .scale-degree,
+        .scale-grid-wrap.compact-mode .scale-step,
+        .harmony-wrap.compact-mode .harmony-degree,
+        .harmony-wrap.compact-mode .harmony-chord {
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.05;
+        }
+        .scale-grid-wrap.compact-mode .scale-note {
+            min-height: 30px;
+            font-size: 0.66rem;
+            padding: 3px 2px;
+        }
+        .scale-grid-wrap.compact-mode .scale-degree {
+            font-size: 0.64rem;
+        }
+        .scale-grid-wrap.compact-mode .scale-step {
+            font-size: 0.58rem;
+            padding: 2px 1px;
+        }
+        .harmony-wrap.compact-mode .harmony-degree {
+            font-size: 0.66rem;
+        }
+        .harmony-wrap.compact-mode .harmony-chord {
+            min-height: 30px;
+            font-size: 0.64rem;
+            padding: 3px 2px;
         }
     }
 
     @media (max-width: 430px) {
-        .scale-grid-wrap.compact-mode .scale-grid {
-            transform: scale(0.72);
-            width: 139%;
-            margin-bottom: -28%;
+        .scale-grid-wrap.compact-mode .scale-note {
+            font-size: 0.6rem;
+            min-height: 27px;
         }
-        .harmony-wrap.compact-mode .harmony-degrees-row,
-        .harmony-wrap.compact-mode .harmony-chords-row {
-            transform: scale(0.79);
-            width: 126%;
-            margin-bottom: -15%;
+        .scale-grid-wrap.compact-mode .scale-step {
+            font-size: 0.54rem;
+        }
+        .harmony-wrap.compact-mode .harmony-chord {
+            font-size: 0.6rem;
+            min-height: 27px;
         }
     }
     </style>

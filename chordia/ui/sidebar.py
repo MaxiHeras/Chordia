@@ -288,7 +288,7 @@ def render_sidebar(
     modo_previo = st.session_state.get("modo_actual", MODE_DICTIONARY)
     modo = st.radio(
         " ",
-        [MODE_DICTIONARY, MODE_IDENTIFIER, MODE_SCALES, MODE_SCALE_HARMONIZATION],
+        [MODE_IDENTIFIER, MODE_DICTIONARY, MODE_SCALES, MODE_SCALE_HARMONIZATION],
         label_visibility="collapsed",
     )
     st.session_state.modo_actual = modo
@@ -326,7 +326,6 @@ def render_sidebar(
 
     if modo == MODE_SCALES:
         render_scales_sidebar(scales_df, reset_selection=mode_changed)
-        _render_mobile_view_mode_switch()
         def _build_scales_pdf() -> bytes | None:
             if scales_df is None:
                 return None
@@ -349,11 +348,11 @@ def render_sidebar(
 
         _render_pdf_controls(_build_scales_pdf, f"Escalas_{st.session_state.get('scale_root', 'C')}.pdf")
         render_share_section()
+        _render_mobile_view_mode_switch()
         return modo, "", None
 
     if modo == MODE_SCALE_HARMONIZATION:
         render_harmonization_sidebar(harmony_df, reset_selection=mode_changed)
-        _render_mobile_view_mode_switch()
         def _build_harmony_pdf() -> bytes | None:
             if harmony_df is None:
                 return None
@@ -371,6 +370,7 @@ def render_sidebar(
 
         _render_pdf_controls(_build_harmony_pdf, f"Armonizacion_{st.session_state.get('arm_root', 'C')}.pdf")
         render_share_section()
+        _render_mobile_view_mode_switch()
         return modo, "", None
 
     render_identifier_sidebar()
