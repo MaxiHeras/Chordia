@@ -36,6 +36,10 @@ class ChordiaPDF(FPDF):
 
 
 def _ensure_space(pdf: ChordiaPDF, needed_height: float, print_mode: str) -> None:
+    if pdf.page_no() == 0:
+        pdf.add_page()
+        if print_mode == "one_per_page":
+            return
     if print_mode == "one_per_page":
         pdf.add_page()
         return

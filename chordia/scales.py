@@ -80,6 +80,11 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
     if not text:
         return None
 
+    # Normalizaciones para variantes decimales y formatos combinados.
+    text = re.sub(r"1\s*[,\.]\s*5\s*T", "TS", text)
+    text = re.sub(r"T\s*[,\.]\s*5", "TS", text)
+    text = re.sub(r"1\s*[,\.]\s*5", "TS", text)
+
     text = text.replace("SEMITONO", "ST").replace("SEMI TONO", "ST")
     text = text.replace("TONO", "T")
     text = text.replace("W", "T").replace("H", "S")
