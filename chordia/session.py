@@ -12,6 +12,8 @@ def ensure_session_defaults() -> None:
         st.session_state.notas_inversas = set()
     if "pdf_data" not in st.session_state:
         st.session_state.pdf_data = None
+    if "pdf_filename" not in st.session_state:
+        st.session_state.pdf_filename = "Chordia.pdf"
     if "descargado" not in st.session_state:
         st.session_state.descargado = False
     if "filtro_alteracion" not in st.session_state:
@@ -31,6 +33,7 @@ def select_all_types(opciones: list[str]) -> None:
 def clear_selection_and_pdf() -> None:
     st.session_state.seleccionados = []
     st.session_state.pdf_data = None
+    st.session_state.pdf_filename = "Chordia.pdf"
     st.session_state.descargado = False
 
 

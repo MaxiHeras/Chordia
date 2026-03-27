@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import urllib.parse
+from collections.abc import Callable
 
 import pandas as pd
 import streamlit as st
 
-from chordia.chords import filter_roots_by_alteration
+from chordia.chords import filter_roots_by_alteration, row_note_set
 from chordia.config import DEFAULT_APP_PUBLIC_URL, GITHUB_RAW_BASE
 from chordia.constants import (
     MODE_DICTIONARY,
@@ -18,6 +19,7 @@ from chordia.constants import (
     ORDEN_TIPOS,
 )
 from chordia.pdf import build_selection_pdf
+from chordia.pdf import build_info_pdf, build_scales_pdf
 from chordia.scales import detect_scale_columns, roots_for_alteration
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
 
@@ -74,36 +76,6 @@ def render_dictionary_sidebar(df: pd.DataFrame) -> tuple[str, pd.DataFrame]:
     c1, c2 = st.columns(2)
     c1.button("Todo", on_click=select_all_types, args=(opciones,), use_container_width=True)
     c2.button("Limpiar", on_click=clear_selection_and_pdf, use_container_width=True)
-    st.write("")
-    placeholder = st.empty()
-    if st.session_state.descargado:
-        placeholder.success("✅ ¡Listo, guardado!")
-    elif st.session_state.pdf_data:
-        placeholder.info("✅ ¡Listo para guardar!")
-
-    if st.button("📥 Generar PDF de Selección", use_container_width=True):
-        df_para_pdf = df_raiz[df_raiz["Naturaleza"].isin(st.session_state.seleccionados)]
-        if not df_para_pdf.empty:
-            placeholder.markdown("⏳ *Preparando PDF...*")
-            st.session_state.pdf_data = build_selection_pdf(
-                df_para_pdf,
-                GITHUB_RAW_BASE,
-                _app_public_url(),
-            )
-            st.session_state.descargado = False
-            st.rerun()
-
-    if st.session_state.pdf_data:
-        st.download_button(
-            "💾 GUARDAR ARCHIVO",
-            bytes(st.session_state.pdf_data),
-            f"Acordes_{raiz_sel}.pdf",
-            "application/pdf",
-            use_container_width=True,
-            type="primary",
-            on_click=lambda: st.session_state.update({"descargado": True}),
-        )
-
     return raiz_sel, df_raiz
 
 
@@ -207,6 +179,37 @@ def render_share_section() -> None:
     st.caption("by Maxi Heras - Tucumán")
 
 
+def _render_pdf_controls(pdf_builder: Callable[[], bytes | None], filename: str) -> None:
+    st.write("")
+    placeholder = st.empty()
+    if st.session_state.descargado:
+        placeholder.success("✅ ¡Listo, guardado!")
+    elif st.session_state.pdf_data:
+        placeholder.info("✅ ¡Listo para guardar!")
+
+    if st.button("📥 Generar PDF de Selección", use_container_width=True, key="sidebar_generate_pdf"):
+        placeholder.markdown("⏳ *Preparando PDF...*")
+        pdf_bytes = pdf_builder()
+        if pdf_bytes:
+            st.session_state.pdf_data = pdf_bytes
+            st.session_state.pdf_filename = filename
+            st.session_state.descargado = False
+            st.rerun()
+        placeholder.warning("No hay contenido disponible para generar PDF.")
+
+    if st.session_state.pdf_data:
+        st.download_button(
+            "💾 GUARDAR ARCHIVO",
+            bytes(st.session_state.pdf_data),
+            st.session_state.get("pdf_filename", filename),
+            "application/pdf",
+            use_container_width=True,
+            type="primary",
+            on_click=lambda: st.session_state.update({"descargado": True}),
+            key="sidebar_download_pdf",
+        )
+
+
 def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[str, str, pd.DataFrame | None]:
     """
     Devuelve (modo, raiz_sel, df_raiz).
@@ -221,25 +224,82 @@ def render_sidebar(df: pd.DataFrame, scales_df: pd.DataFrame | None) -> tuple[st
     )
     st.session_state.modo_actual = modo
 
-    if modo != modo_previo and "u_raiz" in st.session_state:
-        del st.session_state.u_raiz
+    mode_changed = modo != modo_previo
+    if mode_changed:
+        if "u_raiz" in st.session_state:
+            del st.session_state.u_raiz
+        st.session_state.pdf_data = None
+        st.session_state.descargado = False
 
     st.write("---")
 
+    raiz_sel = ""
+    df_raiz: pd.DataFrame | None = None
+
     if modo == MODE_DICTIONARY:
         raiz_sel, df_raiz = render_dictionary_sidebar(df)
+        def _build_dict_pdf() -> bytes | None:
+            if df_raiz is None:
+                return None
+            df_para_pdf = df_raiz[df_raiz["Naturaleza"].isin(st.session_state.seleccionados)]
+            if df_para_pdf.empty:
+                return None
+            return build_selection_pdf(df_para_pdf, GITHUB_RAW_BASE, _app_public_url())
+
+        _render_pdf_controls(_build_dict_pdf, f"Acordes_{raiz_sel}.pdf")
         render_share_section()
         return modo, raiz_sel, df_raiz
-    mode_changed = modo != modo_previo
 
     if modo == MODE_SCALES:
         render_scales_sidebar(scales_df, reset_selection=mode_changed)
+        def _build_scales_pdf() -> bytes | None:
+            if scales_df is None:
+                return None
+            type_col, struct_col = detect_scale_columns(scales_df)
+            if not type_col or not struct_col:
+                return None
+            selected_types = st.session_state.get("scales_selected_types", [])
+            root = st.session_state.get("scale_root", "C")
+            if not selected_types:
+                return None
+            return build_scales_pdf(
+                scales_df=scales_df,
+                selected_types=selected_types,
+                root_note=root,
+                app_public_url=_app_public_url(),
+                type_col=type_col,
+                struct_col=struct_col,
+            )
+
+        _render_pdf_controls(_build_scales_pdf, f"Escalas_{st.session_state.get('scale_root', 'C')}.pdf")
         render_share_section()
         return modo, "", None
+
     if modo == MODE_SCALE_HARMONIZATION:
+        _render_pdf_controls(
+            lambda: build_info_pdf(
+                "Armonización de escalas",
+                [
+                    "Sección en construcción.",
+                    "Próximamente se generará un PDF completo de armonización.",
+                ],
+                _app_public_url(),
+            ),
+            "Armonizacion_de_escalas.pdf",
+        )
         render_share_section()
         return modo, "", None
 
     render_identifier_sidebar()
+    def _build_identifier_pdf() -> bytes | None:
+        notas_act = {n.strip() for n in st.session_state.notas_inversas}
+        if not notas_act:
+            return None
+        res = df[df.apply(lambda r: row_note_set(r) == notas_act, axis=1)]
+        if res.empty:
+            return None
+        return build_selection_pdf(res.head(1), GITHUB_RAW_BASE, _app_public_url())
+
+    _render_pdf_controls(_build_identifier_pdf, "Identificador_de_acorde.pdf")
     render_share_section()
     return modo, "", None
