@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from chordia.chords import add_note_key_column
+from chordia.relative_comparison import build_relative_key_pairs
 from chordia.config import (
     HARMONIZATION_SHEET_CANDIDATES,
     RELATIVE_COMPARISON_SHEET_CANDIDATES,
@@ -50,15 +51,21 @@ def load_scales() -> pd.DataFrame | None:
     return None
 
 
-@st.cache_data(ttl=600)
+def _normalize_sheet_csv_columns(df: pd.DataFrame) -> None:
+    """Quita espacios y BOM (\ufeff) que Google a veces antepone al primer encabezado."""
+    df.columns = [str(c).strip().lstrip("\ufeff") for c in df.columns]
+
+
+@st.cache_data(ttl=120)
 def load_relative_comparison_pairs() -> pd.DataFrame | None:
     """Hoja con columnas Mayor / Menor (orden de filas = orden en los desplegables)."""
     for sheet_name in RELATIVE_COMPARISON_SHEET_CANDIDATES:
         try:
             df = pd.read_csv(sheet_csv_url(sheet_name))
-            df.columns = [str(c).strip() for c in df.columns]
-            if not df.empty:
-                return df
+            _normalize_sheet_csv_columns(df)
+            if df.empty or build_relative_key_pairs(df) is None:
+                continue
+            return df
         except Exception:
             continue
     return None
