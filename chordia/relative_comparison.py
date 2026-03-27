@@ -190,7 +190,7 @@ def quality_fill_rgb(token: str) -> tuple[int, int, int]:
     if t in ("—", "-", "–", "\u2014"):
         return (229, 231, 235)
     if t == "M":
-        return (187, 247, 208)
+        return (143, 209, 143)
     if t == "m":
         return (254, 249, 195)
     if t in ("dism", "#dism"):
