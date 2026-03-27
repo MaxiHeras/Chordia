@@ -217,9 +217,16 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     pdf.set_auto_page_break(auto=True, margin=35)
     pdf.add_page()
     pdf.set_font("helvetica", "B", 16)
-    pdf.cell(0, 10, "Relativas y comparación", border=0, ln=True, align="C")
+    # Helvetica estandar: evitar guiones Unicode (p. ej. U+2014) que rompen la exportacion.
+    pdf.cell(0, 10, "Relativas y comparacion", border=0, ln=True, align="C")
     pdf.set_font("helvetica", "", 10)
-    pdf.cell(0, 6, f"Mayor: {data.major_root} — Menor relativa: {data.minor_root}", ln=True, align="C")
+    pdf.cell(
+        0,
+        6,
+        f"Mayor: {data.major_root} - Menor relativa: {data.minor_root}",
+        ln=True,
+        align="C",
+    )
     pdf.ln(4)
 
     total_w = pdf.w - pdf.l_margin - pdf.r_margin

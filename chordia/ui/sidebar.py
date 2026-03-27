@@ -21,7 +21,11 @@ from chordia.constants import (
 )
 from chordia.harmonization import detect_harmonization_columns
 from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, build_scales_pdf, build_selection_pdf
-from chordia.relative_comparison import relative_major_option, relative_minor_option
+from chordia.relative_comparison import (
+    rel_comp_root_options,
+    sync_major_from_minor_for_options,
+    sync_minor_from_major_for_options,
+)
 from chordia.scales import detect_scale_columns, roots_for_alteration
 from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
 
@@ -208,9 +212,9 @@ def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selectio
 def render_relative_comparison_sidebar() -> None:
     st.write("Filtrar Alteración:")
     f_cols = st.columns(3)
-    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion_rel == "Nat."), key="rel_comp_nat")
-    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion_rel == "Sost."), key="rel_comp_sost")
-    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion_rel == "Bem."), key="rel_comp_bem")
+    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion_rel == "Nat."))
+    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion_rel == "Sost."))
+    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion_rel == "Bem."))
 
     if nat and st.session_state.filtro_alteracion_rel != "Nat.":
         st.session_state.filtro_alteracion_rel = "Nat."
@@ -221,23 +225,35 @@ def render_relative_comparison_sidebar() -> None:
     elif not nat and not sost and not bem:
         st.session_state.filtro_alteracion_rel = "Nat."
 
-    opts = roots_for_alteration(st.session_state.filtro_alteracion_rel)
+    filt = st.session_state.filtro_alteracion_rel
+    opts = rel_comp_root_options(filt)
+    sig = (filt, tuple(opts))
+    if st.session_state.get("_rel_comp_last_opts_sig") != sig:
+        st.session_state._rel_comp_last_opts_sig = sig
+        if st.session_state.rel_comp_maj_root not in opts:
+            st.session_state.rel_comp_maj_root = opts[0]
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+            st.session_state.rel_comp_maj_root, filt
+        )
+
     if st.session_state.rel_comp_maj_root not in opts:
         st.session_state.rel_comp_maj_root = opts[0]
     if st.session_state.rel_comp_min_root not in opts:
-        st.session_state.rel_comp_min_root = relative_minor_option(st.session_state.rel_comp_maj_root, opts)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+            st.session_state.rel_comp_maj_root, filt
+        )
 
     def _on_rel_major() -> None:
-        o = roots_for_alteration(st.session_state.filtro_alteracion_rel)
-        m = st.session_state.rel_comp_maj_root
-        if m in o:
-            st.session_state.rel_comp_min_root = relative_minor_option(m, o)
+        f = st.session_state.filtro_alteracion_rel
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+            st.session_state.rel_comp_maj_root, f
+        )
 
     def _on_rel_minor() -> None:
-        o = roots_for_alteration(st.session_state.filtro_alteracion_rel)
-        m = st.session_state.rel_comp_min_root
-        if m in o:
-            st.session_state.rel_comp_maj_root = relative_major_option(m, o)
+        f = st.session_state.filtro_alteracion_rel
+        st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(
+            st.session_state.rel_comp_min_root, f
+        )
 
     st.selectbox(
         "Raíz modo mayor",
@@ -265,22 +281,29 @@ def render_share_section() -> None:
     st.caption("by Maxi Heras - Tucumán")
 
 
-def _render_pdf_controls(pdf_builder: Callable[[], bytes | None], filename: str) -> None:
-    st.radio(
-        "Modo de impresión PDF:",
-        options=["one_per_page", "continuous"],
-        format_func=lambda x: "Una hoja por tipo (por defecto)" if x == "one_per_page" else "Continuo (varios tipos por hoja)",
-        key="pdf_print_mode",
-        horizontal=False,
-    )
-    st.write("")
+def _render_pdf_controls(
+    pdf_builder: Callable[[], bytes | None],
+    filename: str,
+    *,
+    show_print_mode: bool = True,
+    generate_label: str = "📥 Generar PDF de Selección",
+) -> None:
+    if show_print_mode:
+        st.radio(
+            "Modo de impresión PDF:",
+            options=["one_per_page", "continuous"],
+            format_func=lambda x: "Una hoja por tipo (por defecto)" if x == "one_per_page" else "Continuo (varios tipos por hoja)",
+            key="pdf_print_mode",
+            horizontal=False,
+        )
+        st.write("")
     placeholder = st.empty()
     if st.session_state.descargado:
         placeholder.success("✅ ¡Listo, guardado!")
     elif st.session_state.pdf_data:
         placeholder.info("✅ ¡Listo para guardar!")
 
-    if st.button("📥 Generar PDF de Selección", use_container_width=True, key="sidebar_generate_pdf"):
+    if st.button(generate_label, use_container_width=True, key="sidebar_generate_pdf"):
         placeholder.markdown("⏳ *Preparando PDF...*")
         pdf_bytes = pdf_builder()
         if pdf_bytes:
@@ -432,6 +455,8 @@ def render_sidebar(
         _render_pdf_controls(
             _build_rel_pdf,
             f"Relativas_{st.session_state.get('rel_comp_maj_root', 'C')}_{st.session_state.get('rel_comp_min_root', 'A')}.pdf",
+            show_print_mode=False,
+            generate_label="📥 Generar PDF (vista actual)",
         )
         render_share_section()
         _render_mobile_view_mode_switch()

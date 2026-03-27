@@ -125,6 +125,29 @@ def relative_major_option(minor_root: str, root_options: list[str]) -> str:
     return pick_root_for_pc(maj_pc, root_options)
 
 
+# 12 tónicas por convención de alteración (para que SI exista la relativa en el mismo listado).
+_REL_ROOTS_FLAT = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+_REL_ROOTS_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def rel_comp_root_options(filtro: str) -> list[str]:
+    if filtro == "Sost.":
+        return list(_REL_ROOTS_SHARP)
+    return list(_REL_ROOTS_FLAT)
+
+
+def sync_minor_from_major_for_options(major_root: str, filtro: str) -> str:
+    opts = rel_comp_root_options(filtro)
+    spelled = relative_minor_from_major(major_root)
+    return pick_root_for_pc(_note_pitch_class(spelled), opts)
+
+
+def sync_major_from_minor_for_options(minor_root: str, filtro: str) -> str:
+    opts = rel_comp_root_options(filtro)
+    spelled = relative_major_from_minor(minor_root)
+    return pick_root_for_pc(_note_pitch_class(spelled), opts)
+
+
 @dataclass
 class RelativeComparisonData:
     major_root: str
@@ -198,7 +221,7 @@ def quality_fill_rgb(token: str) -> tuple[int, int, int]:
     """RGB 0–255 para relleno de celdas en PDF (misma leyenda que la web)."""
     t = (token or "").strip()
     if t in ("—", "-", "–", "\u2014"):
-        return (229, 231, 235)
+        return (120, 130, 145)
     if t == "M":
         return (143, 209, 143)
     if t == "m":
