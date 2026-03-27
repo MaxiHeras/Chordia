@@ -206,17 +206,23 @@ def inject_custom_css() -> None:
 
     .rel-comp-wrap {
         width: 100%;
+        max-width: 100%;
         overflow-x: auto;
         margin-top: 12px;
         margin-bottom: 16px;
     }
     .rel-comp-table {
         border-collapse: collapse;
+        table-layout: fixed;
         width: 100%;
         min-width: 640px;
         font-size: 0.92rem;
         margin-bottom: 20px;
     }
+    .rel-comp-col-corner { width: 52px; min-width: 52px; max-width: 52px; }
+    .rel-comp-col-label { width: 62px; min-width: 62px; max-width: 62px; }
+    /* Las 7 columnas de datos sin ancho explícito reparten el mismo trozo en layout fijo. */
+    .rel-comp-col-data { width: auto; }
     .rel-comp-table th, .rel-comp-table td {
         border: 1px solid #cbd5e1;
         padding: 8px 6px;
@@ -225,8 +231,6 @@ def inject_custom_css() -> None:
     }
     .rel-comp-corner {
         background: #f1f5f9;
-        width: 52px;
-        min-width: 52px;
         font-weight: 700;
         font-size: 0.72rem;
         line-height: 1.15;
@@ -242,9 +246,8 @@ def inject_custom_css() -> None:
         background: #f8fafc;
         font-weight: 600;
         text-align: left !important;
-        width: 52px;
-        min-width: 52px;
         font-size: 0.82rem;
+        overflow: hidden;
     }
     .rel-comp-cell {
         font-weight: 600;

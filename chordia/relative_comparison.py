@@ -167,6 +167,16 @@ def build_comparison_data(major_root: str, minor_root: str) -> RelativeCompariso
 
 ROMAN_HEADER = ROMAN_DEGREES[:-1]
 
+# Misma plantilla de columnas en mayor y menor para que las celdas encajen verticalmente.
+_REL_COMP_COLGROUP = (
+    "<colgroup>"
+    '<col class="rel-comp-col-corner" />'
+    '<col class="rel-comp-col-label" />'
+    '<col class="rel-comp-col-data" /><col class="rel-comp-col-data" /><col class="rel-comp-col-data" />'
+    '<col class="rel-comp-col-data" /><col class="rel-comp-col-data" /><col class="rel-comp-col-data" /><col class="rel-comp-col-data" />'
+    "</colgroup>"
+)
+
 
 def quality_cell_class(token: str) -> str:
     """Clases para colorear celdas de calidad (EM, EmN, EmA, EmM)."""
@@ -204,7 +214,7 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
     wrap = "rel-comp-wrap rel-comp-compact" if compact else "rel-comp-wrap"
 
     def major_table() -> str:
-        b = ['<table class="rel-comp-table">']
+        b = ['<table class="rel-comp-table">', _REL_COMP_COLGROUP]
         b.append(
             f'<tr><th class="rel-comp-corner" rowspan="4"><span class="rel-comp-vtitle">TONALIDAD MAYOR</span></th>'
             f'<th class="rel-comp-left">Raíz</th>'
@@ -230,7 +240,7 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
         return "".join(b)
 
     def minor_table() -> str:
-        b = ['<table class="rel-comp-table">']
+        b = ['<table class="rel-comp-table">', _REL_COMP_COLGROUP]
         b.append(
             f'<tr><th class="rel-comp-corner" rowspan="6"><span class="rel-comp-vtitle">TONALIDAD MENOR</span></th>'
             f'<th class="rel-comp-left">Raíz</th>'
