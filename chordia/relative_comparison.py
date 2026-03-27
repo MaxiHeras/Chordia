@@ -213,8 +213,8 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
             b.append(f'<td class="rel-comp-cell rel-comp-strong">{n}</td>')
         b.append("</tr>")
         b.append(
-            '<tr><th class="rel-comp-left"></th>'
-            + "".join('<td class="rel-comp-cell"></td>' for _ in range(7))
+            '<tr class="rel-comp-spacer-row"><th class="rel-comp-left"></th>'
+            + "".join('<td class="rel-comp-cell rel-comp-spacer"></td>' for _ in range(7))
             + "</tr>",
         )
         b.append('<tr><th class="rel-comp-left">Grados</th>')
@@ -239,8 +239,8 @@ def render_relative_comparison_html(data: RelativeComparisonData, compact: bool)
             b.append(f'<td class="rel-comp-cell rel-comp-strong">{n}</td>')
         b.append("</tr>")
         b.append(
-            '<tr><th class="rel-comp-left"></th>'
-            + "".join('<td class="rel-comp-cell"></td>' for _ in range(7))
+            '<tr class="rel-comp-spacer-row"><th class="rel-comp-left"></th>'
+            + "".join('<td class="rel-comp-cell rel-comp-spacer"></td>' for _ in range(7))
             + "</tr>",
         )
         b.append('<tr><th class="rel-comp-left">Grados</th>')

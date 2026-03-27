@@ -250,6 +250,13 @@ def inject_custom_css() -> None:
         font-weight: 600;
         background: #ffffff;
     }
+    .rel-comp-spacer-row th.rel-comp-left,
+    .rel-comp-table td.rel-comp-spacer {
+        background: #f8fafc !important;
+    }
+    .rel-comp-spacer-row td.rel-comp-spacer {
+        border-color: #e2e8f0;
+    }
     .rel-comp-strong {
         color: #0f172a;
     }

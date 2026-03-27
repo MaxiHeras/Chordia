@@ -228,17 +228,32 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     h_row = 6.0
     left = pdf.l_margin
 
-    def row_line(label: str, cells: list[str], *, colorize: bool = False) -> None:
+    _spacer_fill = (248, 250, 252)
+
+    def row_line(
+        label: str,
+        cells: list[str],
+        *,
+        colorize: bool = False,
+        band_fill: bool = False,
+    ) -> None:
         pdf.set_x(left)
         pdf.set_font("helvetica", "B", 8)
-        pdf.set_fill_color(255, 255, 255)
-        pdf.cell(col_label, h_row, label, border=1)
+        if band_fill and not colorize:
+            pdf.set_fill_color(*_spacer_fill)
+            pdf.cell(col_label, h_row, label, border=1, fill=True)
+        else:
+            pdf.set_fill_color(255, 255, 255)
+            pdf.cell(col_label, h_row, label, border=1)
         pdf.set_font("helvetica", "", 8)
         for c in cells:
             txt = c.replace("—", "-")
             if colorize:
                 r, g, b = quality_fill_rgb(c)
                 pdf.set_fill_color(r, g, b)
+                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=True)
+            elif band_fill:
+                pdf.set_fill_color(*_spacer_fill)
                 pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=True)
             else:
                 pdf.set_fill_color(255, 255, 255)
@@ -249,7 +264,7 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     pdf.cell(0, 7, "Tonalidad mayor", ln=True)
     pdf.set_font("helvetica", "", 8)
     row_line("Raíz", data.major_degrees_notes)
-    row_line("", [""] * 7)
+    row_line("", [""] * 7, band_fill=True)
     row_line("Grados", list(ROMAN_HEADER))
     row_line("EM", data.major_harm_row, colorize=True)
     pdf.ln(5)
@@ -258,7 +273,7 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
     pdf.cell(0, 7, "Tonalidad menor (relativa)", ln=True)
     pdf.set_font("helvetica", "", 8)
     row_line("Raíz", data.minor_degrees_notes)
-    row_line("", [""] * 7)
+    row_line("", [""] * 7, band_fill=True)
     row_line("Grados", list(ROMAN_HEADER))
     row_line("EmN", data.minor_emn, colorize=True)
     row_line("EmA", data.minor_ema_display, colorize=True)
