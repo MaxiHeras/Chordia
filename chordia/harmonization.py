@@ -111,16 +111,18 @@ def render_harmonization_result(
     notes: list[str],
     chords: list[str],
     steps: list[int],
+    compact: bool = False,
 ) -> None:
     st.subheader(f"{root_note} {scale_type}")
-    render_scale_grid(notes, steps)
+    render_scale_grid(notes, steps, compact=compact)
     st.markdown(
         f'<div class="scale-structure-caption">Estructura: {raw_structure}</div>',
         unsafe_allow_html=True,
     )
     st.markdown("**Acordes de la escala armonizada**")
 
-    items = ['<div class="harmony-wrap"><div class="harmony-degrees-row">']
+    wrap_class = "harmony-wrap compact-mode" if compact else "harmony-wrap"
+    items = [f'<div class="{wrap_class}"><div class="harmony-degrees-row">']
     for i, deg in enumerate(ROMAN_DEGREES[:-1]):
         items.append(f'<div class="harmony-degree">{deg}</div>')
     items.append("</div>")

@@ -148,9 +148,10 @@ def build_scale(root_note: str, step_pattern: list[int]) -> list[str]:
     return notes
 
 
-def render_scale_grid(notes: list[str], steps: list[int]) -> None:
+def render_scale_grid(notes: list[str], steps: list[int], compact: bool = False) -> None:
     # 15 columnas: nota/intervalo alternadas, y una nota final sin intervalo.
-    html = ['<div class="scale-grid-wrap"><div class="scale-grid">']
+    wrapper_class = "scale-grid-wrap compact-mode" if compact else "scale-grid-wrap"
+    html = [f'<div class="{wrapper_class}"><div class="scale-grid">']
 
     # Fila 1: grados romanos sobre las notas.
     for i, deg in enumerate(ROMAN_DEGREES):

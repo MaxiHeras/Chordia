@@ -32,6 +32,8 @@ def ensure_session_defaults() -> None:
         st.session_state.arm_root = "C"
     if "arm_selected_types" not in st.session_state:
         st.session_state.arm_selected_types = []
+    if "mobile_content_view_mode" not in st.session_state:
+        st.session_state.mobile_content_view_mode = "completa"
 
 
 def select_all_types(opciones: list[str]) -> None:

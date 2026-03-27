@@ -265,6 +265,16 @@ def _render_pdf_controls(pdf_builder: Callable[[], bytes | None], filename: str)
         )
 
 
+def _render_mobile_view_mode_switch() -> None:
+    st.radio(
+        "Vista móvil:",
+        options=["completa", "compacta"],
+        format_func=lambda x: "Completa" if x == "completa" else "Compacta",
+        key="mobile_content_view_mode",
+        horizontal=True,
+    )
+
+
 def render_sidebar(
     df: pd.DataFrame,
     scales_df: pd.DataFrame | None,
@@ -316,6 +326,7 @@ def render_sidebar(
 
     if modo == MODE_SCALES:
         render_scales_sidebar(scales_df, reset_selection=mode_changed)
+        _render_mobile_view_mode_switch()
         def _build_scales_pdf() -> bytes | None:
             if scales_df is None:
                 return None
@@ -342,6 +353,7 @@ def render_sidebar(
 
     if modo == MODE_SCALE_HARMONIZATION:
         render_harmonization_sidebar(harmony_df, reset_selection=mode_changed)
+        _render_mobile_view_mode_switch()
         def _build_harmony_pdf() -> bytes | None:
             if harmony_df is None:
                 return None

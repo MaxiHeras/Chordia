@@ -70,6 +70,7 @@ def render_main_scales(scales_df: pd.DataFrame | None) -> None:
         return
 
     tabs = st.tabs(selected_types)
+    compact = st.session_state.get("mobile_content_view_mode", "completa") == "compacta"
     for i, scale_type in enumerate(selected_types):
         with tabs[i]:
             matches = scales_df[scales_df[type_col].astype(str).str.strip() == str(scale_type).strip()]
@@ -84,7 +85,7 @@ def render_main_scales(scales_df: pd.DataFrame | None) -> None:
                 continue
             notes = build_scale(root, steps)
             st.subheader(f"{root} {scale_type}")
-            render_scale_grid(notes, steps)
+            render_scale_grid(notes, steps, compact=compact)
             st.markdown(
                 f'<div class="scale-structure-caption">Estructura: {raw_structure}</div>',
                 unsafe_allow_html=True,
@@ -119,6 +120,7 @@ def render_main_scale_harmonization(
         return
 
     tabs = st.tabs(selected_types)
+    compact = st.session_state.get("mobile_content_view_mode", "completa") == "compacta"
     for i, scale_type in enumerate(selected_types):
         with tabs[i]:
             matches = harmony_df[harmony_df[type_col].astype(str).str.strip() == str(scale_type).strip()]
@@ -142,7 +144,7 @@ def render_main_scale_harmonization(
                 st.warning("No se pudo interpretar la estructura de la escala.")
                 continue
             notes, chords = build_harmonized_chords(root, steps, harmony_tokens)
-            render_harmonization_result(root, scale_type, raw_structure, notes, chords, steps)
+            render_harmonization_result(root, scale_type, raw_structure, notes, chords, steps, compact=compact)
 
 
 def render_main(

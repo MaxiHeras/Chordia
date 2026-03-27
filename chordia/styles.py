@@ -130,6 +130,43 @@ def inject_custom_css() -> None:
         .harmony-degrees-row, .harmony-chords-row { min-width: 620px; gap: 6px 8px; }
         .harmony-degree { font-size: 0.8rem; }
         .harmony-chord { min-height: 34px; font-size: 0.82rem; padding: 6px 3px; }
+
+        /* Vista compacta: sin scroll, ajuste proporcional del contenido principal. */
+        .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
+            overflow-x: visible;
+        }
+        .scale-grid-wrap.compact-mode .scale-grid {
+            min-width: 0;
+            transform-origin: top left;
+            transform: scale(0.77);
+            width: 130%;
+            margin-bottom: -22%;
+        }
+        .harmony-wrap.compact-mode .harmony-degrees-row,
+        .harmony-wrap.compact-mode .harmony-chords-row {
+            min-width: 0;
+            transform-origin: top left;
+            transform: scale(0.84);
+            width: 119%;
+            margin-bottom: -10%;
+        }
+        .harmony-wrap.compact-mode .harmony-chords-row {
+            margin-top: -4%;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .scale-grid-wrap.compact-mode .scale-grid {
+            transform: scale(0.72);
+            width: 139%;
+            margin-bottom: -28%;
+        }
+        .harmony-wrap.compact-mode .harmony-degrees-row,
+        .harmony-wrap.compact-mode .harmony-chords-row {
+            transform: scale(0.79);
+            width: 126%;
+            margin-bottom: -15%;
+        }
     }
     </style>
 """,
