@@ -161,6 +161,14 @@ def sync_major_from_minor_for_options(minor_root: str, filtro: str, maj_root: st
     return pick_root_for_pc(_note_pitch_class(spelled), opts)
 
 
+def rel_comp_pair_is_consistent(maj_root: str, min_root: str) -> bool:
+    """True si menor es la relativa de mayor o mayor la de menor (misma clase de altura)."""
+    return (
+        _note_pitch_class(min_root) == _note_pitch_class(relative_minor_from_major(maj_root))
+        or _note_pitch_class(maj_root) == _note_pitch_class(relative_major_from_minor(min_root))
+    )
+
+
 @dataclass
 class RelativeComparisonData:
     major_root: str

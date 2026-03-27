@@ -22,6 +22,7 @@ from chordia.constants import (
 from chordia.harmonization import detect_harmonization_columns
 from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, build_scales_pdf, build_selection_pdf
 from chordia.relative_comparison import (
+    rel_comp_pair_is_consistent,
     rel_comp_root_options,
     relative_major_from_minor,
     relative_minor_from_major,
@@ -210,34 +211,38 @@ def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selectio
 
 
 def render_relative_comparison_sidebar() -> None:
-    st.write("Filtrar Alteración:")
-    f_cols = st.columns(3)
-    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion_rel == "Nat."))
-    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion_rel == "Sost."))
-    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion_rel == "Bem."))
-
-    if nat and st.session_state.filtro_alteracion_rel != "Nat.":
-        st.session_state.filtro_alteracion_rel = "Nat."
-    elif sost and st.session_state.filtro_alteracion_rel != "Sost.":
-        st.session_state.filtro_alteracion_rel = "Sost."
-    elif bem and st.session_state.filtro_alteracion_rel != "Bem.":
-        st.session_state.filtro_alteracion_rel = "Bem."
-    elif not nat and not sost and not bem:
-        st.session_state.filtro_alteracion_rel = "Nat."
-
+    st.radio(
+        "Filtrar alteración:",
+        ["Nat.", "Sost.", "Bem."],
+        horizontal=True,
+        key="filtro_alteracion_rel",
+        help="Solo una convención a la vez (comportamiento excluyente).",
+    )
     filt = st.session_state.filtro_alteracion_rel
     base = roots_for_alteration(filt)
-    if st.session_state.get("_rel_comp_filt") != filt:
-        st.session_state._rel_comp_filt = filt
+    if st.session_state.get("_rel_comp_filt_marker") != filt:
+        st.session_state._rel_comp_filt_marker = filt
         st.session_state.rel_comp_maj_root = base[0]
         st.session_state.rel_comp_min_root = relative_minor_from_major(base[0])
+        st.session_state._rel_comp_last_edit = "maj"
 
     maj = st.session_state.rel_comp_maj_root
     mn = st.session_state.rel_comp_min_root
+    if not rel_comp_pair_is_consistent(maj, mn):
+        if st.session_state.get("_rel_comp_last_edit") == "min":
+            st.session_state.rel_comp_maj_root = relative_major_from_minor(mn)
+        else:
+            st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+        maj = st.session_state.rel_comp_maj_root
+        mn = st.session_state.rel_comp_min_root
+
     opts = rel_comp_root_options(filt, maj, mn)
     if maj not in opts:
         st.session_state.rel_comp_maj_root = base[0]
         maj = st.session_state.rel_comp_maj_root
+        st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
+        mn = st.session_state.rel_comp_min_root
+        st.session_state._rel_comp_last_edit = "maj"
     if mn not in opts:
         st.session_state.rel_comp_min_root = relative_minor_from_major(maj)
         mn = st.session_state.rel_comp_min_root
@@ -245,9 +250,11 @@ def render_relative_comparison_sidebar() -> None:
 
     def _on_rel_major() -> None:
         st.session_state.rel_comp_min_root = relative_minor_from_major(st.session_state.rel_comp_maj_root)
+        st.session_state._rel_comp_last_edit = "maj"
 
     def _on_rel_minor() -> None:
         st.session_state.rel_comp_maj_root = relative_major_from_minor(st.session_state.rel_comp_min_root)
+        st.session_state._rel_comp_last_edit = "min"
 
     st.selectbox(
         "Raíz modo mayor",
