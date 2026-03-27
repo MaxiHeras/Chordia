@@ -5,6 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from chordia.chords import add_note_key_column
 from chordia.config import (
     HARMONIZATION_SHEET_CANDIDATES,
     SCALE_SHEET_CANDIDATES,
@@ -30,7 +31,7 @@ def load_chords(url: str = URL_EXCEL) -> pd.DataFrame | None:
     try:
         df = pd.read_csv(url)
         df.columns = [str(c).strip() for c in df.columns]
-        return df
+        return add_note_key_column(df)
     except Exception:
         return None
 

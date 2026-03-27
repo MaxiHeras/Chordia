@@ -120,6 +120,62 @@ def inject_custom_css() -> None:
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }
     .c11 { grid-column: 11; } .c12 { grid-column: 12; } .c13 { grid-column: 13; } .c14 { grid-column: 14; } .c15 { grid-column: 15; }
 
+    /* Vista compacta (switch "Compacta"): aplica en cualquier ancho de pantalla, no solo en móvil. */
+    .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
+        overflow-x: visible;
+    }
+    .scale-grid-wrap.compact-mode .scale-grid {
+        min-width: 0;
+        gap: 4px;
+        grid-template-columns:
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr);
+    }
+    .harmony-wrap.compact-mode .harmony-degrees-row,
+    .harmony-wrap.compact-mode .harmony-chords-row {
+        min-width: 0;
+        gap: 4px 6px;
+    }
+    .scale-grid-wrap.compact-mode .scale-note,
+    .scale-grid-wrap.compact-mode .scale-degree,
+    .harmony-wrap.compact-mode .harmony-degree,
+    .harmony-wrap.compact-mode .harmony-chord {
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.05;
+    }
+    .scale-grid-wrap.compact-mode .scale-step {
+        white-space: nowrap;
+        word-break: normal;
+        line-height: 1.15;
+        font-size: 0.72rem;
+        padding: 4px 5px;
+        min-width: 2.9rem;
+        box-sizing: border-box;
+    }
+    .scale-grid-wrap.compact-mode .scale-note {
+        min-height: 30px;
+        font-size: 0.66rem;
+        padding: 3px 2px;
+    }
+    .scale-grid-wrap.compact-mode .scale-degree {
+        font-size: 0.64rem;
+    }
+    .harmony-wrap.compact-mode .harmony-degree {
+        font-size: 0.66rem;
+    }
+    .harmony-wrap.compact-mode .harmony-chord {
+        min-height: 30px;
+        font-size: 0.64rem;
+        padding: 3px 2px;
+    }
+
     @media (max-width: 768px) {
         .block-container { padding-top: 0.5rem !important; }
         .scale-grid { min-width: 760px; gap: 5px; }
@@ -130,49 +186,6 @@ def inject_custom_css() -> None:
         .harmony-degrees-row, .harmony-chords-row { min-width: 620px; gap: 6px 8px; }
         .harmony-degree { font-size: 0.8rem; }
         .harmony-chord { min-height: 34px; font-size: 0.82rem; padding: 6px 3px; }
-
-        /* Vista compacta: sin scroll, reducción proporcional estable (sin amontonar). */
-        .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
-            overflow-x: visible;
-        }
-        .scale-grid-wrap.compact-mode .scale-grid {
-            min-width: 0;
-            gap: 4px;
-        }
-        .harmony-wrap.compact-mode .harmony-degrees-row,
-        .harmony-wrap.compact-mode .harmony-chords-row {
-            min-width: 0;
-            gap: 4px 6px;
-        }
-        .scale-grid-wrap.compact-mode .scale-note,
-        .scale-grid-wrap.compact-mode .scale-degree,
-        .scale-grid-wrap.compact-mode .scale-step,
-        .harmony-wrap.compact-mode .harmony-degree,
-        .harmony-wrap.compact-mode .harmony-chord {
-            white-space: normal;
-            word-break: break-word;
-            line-height: 1.05;
-        }
-        .scale-grid-wrap.compact-mode .scale-note {
-            min-height: 30px;
-            font-size: 0.66rem;
-            padding: 3px 2px;
-        }
-        .scale-grid-wrap.compact-mode .scale-degree {
-            font-size: 0.64rem;
-        }
-        .scale-grid-wrap.compact-mode .scale-step {
-            font-size: 0.58rem;
-            padding: 2px 1px;
-        }
-        .harmony-wrap.compact-mode .harmony-degree {
-            font-size: 0.66rem;
-        }
-        .harmony-wrap.compact-mode .harmony-chord {
-            min-height: 30px;
-            font-size: 0.64rem;
-            padding: 3px 2px;
-        }
     }
 
     @media (max-width: 430px) {
@@ -181,12 +194,76 @@ def inject_custom_css() -> None:
             min-height: 27px;
         }
         .scale-grid-wrap.compact-mode .scale-step {
-            font-size: 0.54rem;
+            font-size: 0.64rem;
+            min-width: 2.75rem;
+            padding: 3px 4px;
         }
         .harmony-wrap.compact-mode .harmony-chord {
             font-size: 0.6rem;
             min-height: 27px;
         }
+    }
+
+    .rel-comp-wrap {
+        width: 100%;
+        overflow-x: auto;
+        margin-top: 12px;
+        margin-bottom: 16px;
+    }
+    .rel-comp-table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 640px;
+        font-size: 0.92rem;
+        margin-bottom: 20px;
+    }
+    .rel-comp-table th, .rel-comp-table td {
+        border: 1px solid #cbd5e1;
+        padding: 8px 6px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .rel-comp-corner {
+        background: #f1f5f9;
+        width: 52px;
+        min-width: 52px;
+        font-weight: 700;
+        font-size: 0.72rem;
+        line-height: 1.15;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+    }
+    .rel-comp-vtitle {
+        display: inline-block;
+        letter-spacing: 0.04em;
+    }
+    .rel-comp-left {
+        background: #f8fafc;
+        font-weight: 600;
+        text-align: left !important;
+        width: 52px;
+        min-width: 52px;
+        font-size: 0.82rem;
+    }
+    .rel-comp-cell {
+        font-weight: 600;
+        background: #ffffff;
+    }
+    .rel-comp-strong {
+        color: #0f172a;
+    }
+    .rel-comp-deg {
+        color: #64748b;
+        font-weight: 700;
+    }
+    .rel-comp-compact .rel-comp-table {
+        font-size: 0.78rem;
+        min-width: 0;
+    }
+    .rel-comp-compact .rel-comp-table th,
+    .rel-comp-compact .rel-comp-table td {
+        padding: 5px 3px;
     }
     </style>
 """,

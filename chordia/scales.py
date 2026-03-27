@@ -162,8 +162,9 @@ def render_scale_grid(notes: list[str], steps: list[int], compact: bool = False)
         html.append(f'<div class="scale-note c{2 * i + 1}">{note}</div>')
 
     # Fila 3: estructura entre notas (T/ST en cuadros).
+    step_attr = ' style="white-space:nowrap"' if compact else ""
     for i, val in enumerate(steps):
-        html.append(f'<div class="scale-step c{2 * i + 2}">{step_to_label(val)}</div>')
+        html.append(f'<div class="scale-step c{2 * i + 2}"{step_attr}>{step_to_label(val)}</div>')
 
     html.append("</div></div>")
     st.markdown("".join(html), unsafe_allow_html=True)

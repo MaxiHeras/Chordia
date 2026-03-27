@@ -5,10 +5,11 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from chordia.chords import row_note_set
+from chordia.chords import match_rows_by_note_set
 from chordia.constants import (
     MODE_DICTIONARY,
     MODE_IDENTIFIER,
+    MODE_RELATIVE_COMPARISON,
     MODE_SCALE_HARMONIZATION,
     MODE_SCALES,
     ORDEN_TIPOS,
@@ -21,6 +22,7 @@ from chordia.harmonization import (
     parse_harmony_structure,
     render_harmonization_result,
 )
+from chordia.relative_comparison import build_comparison_data, render_relative_comparison_html
 from chordia.scales import build_scale, detect_scale_columns, parse_scale_steps, render_scale_grid
 
 
@@ -40,9 +42,7 @@ def render_main_dictionary(raiz_sel: str, df_raiz: pd.DataFrame) -> None:
 def render_main_identifier(df: pd.DataFrame) -> None:
     st.header("🔍 Identificador de Acordes")
     notas_act = {n.strip() for n in st.session_state.notas_inversas}
-    res = df[
-        df.apply(lambda r: row_note_set(r) == notas_act, axis=1)
-    ]
+    res = match_rows_by_note_set(df, notas_act)
     if not notas_act:
         st.info("Seleccioná notas en la barra lateral.")
         return
@@ -147,6 +147,20 @@ def render_main_scale_harmonization(
             render_harmonization_result(root, scale_type, raw_structure, notes, chords, steps, compact=compact)
 
 
+def render_main_relative_comparison() -> None:
+    st.header("⚖️ Relativas y comparación")
+    maj = st.session_state.get("rel_comp_maj_root", "C")
+    mn = st.session_state.get("rel_comp_min_root", "A")
+    data = build_comparison_data(maj, mn)
+    compact = st.session_state.get("mobile_content_view_mode", "completa") == "compacta"
+    st.caption(
+        "Comparación entre la armonización de la escala mayor y las armonizaciones "
+        "de la escala menor relativa (natural, armónica y melódica). "
+        "En EmA y EmM, el guión largo (—) repite la calidad de la fila de arriba."
+    )
+    st.markdown(render_relative_comparison_html(data, compact=compact), unsafe_allow_html=True)
+
+
 def render_main(
     modo: str,
     df: pd.DataFrame,
@@ -163,3 +177,5 @@ def render_main(
         render_main_scales(scales_df)
     elif modo == MODE_SCALE_HARMONIZATION:
         render_main_scale_harmonization(harmony_df, scales_df)
+    elif modo == MODE_RELATIVE_COMPARISON:
+        render_main_relative_comparison()

@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import streamlit as st
 
+from chordia.constants import MODE_DICTIONARY
+
 
 def ensure_session_defaults() -> None:
+    if "modo_actual" not in st.session_state:
+        st.session_state.modo_actual = MODE_DICTIONARY
     if "seleccionados" not in st.session_state:
         st.session_state.seleccionados = []
     if "notas_inversas" not in st.session_state:
@@ -32,6 +36,12 @@ def ensure_session_defaults() -> None:
         st.session_state.arm_root = "C"
     if "arm_selected_types" not in st.session_state:
         st.session_state.arm_selected_types = []
+    if "filtro_alteracion_rel" not in st.session_state:
+        st.session_state.filtro_alteracion_rel = "Nat."
+    if "rel_comp_maj_root" not in st.session_state:
+        st.session_state.rel_comp_maj_root = "C"
+    if "rel_comp_min_root" not in st.session_state:
+        st.session_state.rel_comp_min_root = "A"
     if "mobile_content_view_mode" not in st.session_state:
         st.session_state.mobile_content_view_mode = "completa"
 

@@ -16,6 +16,7 @@ from chordia.harmonization import (
     detect_harmonization_columns,
     parse_harmony_structure,
 )
+from chordia.relative_comparison import ROMAN_HEADER, build_comparison_data
 from chordia.scales import ROMAN_DEGREES, build_scale, detect_scale_columns, parse_scale_steps, step_to_label
 
 
@@ -206,6 +207,59 @@ def build_scales_pdf(
         if print_mode == "continuous":
             pdf.ln(8)
 
+    return pdf.output()
+
+
+def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_url: str) -> bytes:
+    """Una página con tablas mayor / menor relativas (como la vista principal)."""
+    data = build_comparison_data(major_root, minor_root)
+    pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=35)
+    pdf.add_page()
+    pdf.set_font("helvetica", "B", 16)
+    pdf.cell(0, 10, "Relativas y comparación", border=0, ln=True, align="C")
+    pdf.set_font("helvetica", "", 10)
+    pdf.cell(0, 6, f"Mayor: {data.major_root} — Menor relativa: {data.minor_root}", ln=True, align="C")
+    pdf.ln(4)
+
+    total_w = pdf.w - pdf.l_margin - pdf.r_margin
+    col_label = 20.0
+    cell_w = (total_w - col_label) / 7.0
+    h_row = 6.0
+    left = pdf.l_margin
+
+    def row_line(label: str, cells: list[str]) -> None:
+        pdf.set_x(left)
+        pdf.set_font("helvetica", "B", 8)
+        pdf.cell(col_label, h_row, label, border=1)
+        pdf.set_font("helvetica", "", 8)
+        for c in cells:
+            pdf.cell(cell_w, h_row, c.replace("—", "-"), border=1, align="C")
+        pdf.ln(h_row)
+
+    pdf.set_font("helvetica", "B", 11)
+    pdf.cell(0, 7, "Tonalidad mayor", ln=True)
+    pdf.set_font("helvetica", "", 8)
+    row_line("Raíz", data.major_degrees_notes)
+    row_line("", [""] * 7)
+    row_line("Grados", list(ROMAN_HEADER))
+    row_line("EM", data.major_harm_row)
+    pdf.ln(5)
+
+    pdf.set_font("helvetica", "B", 11)
+    pdf.cell(0, 7, "Tonalidad menor (relativa)", ln=True)
+    pdf.set_font("helvetica", "", 8)
+    row_line("Raíz", data.minor_degrees_notes)
+    row_line("", [""] * 7)
+    row_line("Grados", list(ROMAN_HEADER))
+    row_line("EmN", data.minor_emn)
+    row_line("EmA", data.minor_ema_display)
+    row_line("EmM", data.minor_emm_display)
+
+    pdf.set_font("helvetica", "I", 7)
+    pdf.set_text_color(90, 90, 90)
+    pdf.ln(3)
+    pdf.multi_cell(0, 4, "EmA/EmM: el guión indica la misma calidad que en la fila de referencia inmediata (tabla compacta).")
     return pdf.output()
 
 
