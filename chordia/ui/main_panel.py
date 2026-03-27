@@ -18,7 +18,7 @@ from chordia.display import render_chord_detail
 from chordia.harmonization import (
     build_harmonized_chords,
     detect_harmonization_columns,
-    extract_harmony_tokens,
+    parse_harmony_structure,
     render_harmonization_result,
 )
 from chordia.scales import build_scale, detect_scale_columns, parse_scale_steps, render_scale_grid
@@ -91,15 +91,25 @@ def render_main_scales(scales_df: pd.DataFrame | None) -> None:
             )
 
 
-def render_main_scale_harmonization(harmony_df: pd.DataFrame | None) -> None:
+def render_main_scale_harmonization(
+    harmony_df: pd.DataFrame | None,
+    scales_df: pd.DataFrame | None,
+) -> None:
     st.header("🎶 Armonización de escalas")
     if harmony_df is None:
         st.warning("No se pudo cargar la hoja de armonización de escalas.")
         return
 
-    type_col, struct_col, degree_cols, harmony_col = detect_harmonization_columns(harmony_df)
+    type_col, struct_col, _, _ = detect_harmonization_columns(harmony_df)
     if not type_col or not struct_col:
         st.warning("La hoja de armonización no tiene columnas compatibles.")
+        return
+    if scales_df is None:
+        st.warning("No se pudo cargar la hoja de escalas.")
+        return
+    scale_type_col, scale_struct_col = detect_scale_columns(scales_df)
+    if not scale_type_col or not scale_struct_col:
+        st.warning("La hoja de escalas no tiene columnas compatibles.")
         return
 
     selected_types = st.session_state.get("arm_selected_types", [])
@@ -116,14 +126,20 @@ def render_main_scale_harmonization(harmony_df: pd.DataFrame | None) -> None:
                 st.warning("No se encontró el tipo seleccionado en la hoja.")
                 continue
             row = matches.iloc[0]
-            raw_structure = str(row.get(struct_col, "")).strip()
+            harmony_structure = str(row.get(struct_col, "")).strip()
+            harmony_tokens = parse_harmony_structure(harmony_structure)
+            if len(harmony_tokens) != 7:
+                st.warning("No se pudo interpretar la estructura de armonización (7 grados).")
+                continue
+
+            scale_match = scales_df[scales_df[scale_type_col].astype(str).str.strip() == str(scale_type).strip()]
+            if scale_match.empty:
+                st.warning("No se encontró la estructura de escala para este tipo.")
+                continue
+            raw_structure = str(scale_match.iloc[0].get(scale_struct_col, "")).strip()
             steps = parse_scale_steps(raw_structure)
             if not steps:
                 st.warning("No se pudo interpretar la estructura de la escala.")
-                continue
-            harmony_tokens = extract_harmony_tokens(row, degree_cols, harmony_col)
-            if len(harmony_tokens) != 7:
-                st.warning("No se pudo interpretar la estructura de armonización (7 grados).")
                 continue
             notes, chords = build_harmonized_chords(root, steps, harmony_tokens)
             render_harmonization_result(root, scale_type, raw_structure, notes, chords, steps)
@@ -144,4 +160,4 @@ def render_main(
     elif modo == MODE_SCALES:
         render_main_scales(scales_df)
     elif modo == MODE_SCALE_HARMONIZATION:
-        render_main_scale_harmonization(harmony_df)
+        render_main_scale_harmonization(harmony_df, scales_df)

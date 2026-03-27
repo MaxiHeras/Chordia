@@ -14,9 +14,9 @@ from chordia.constants import DIAGRAM_COUNT
 from chordia.harmonization import (
     build_harmonized_chords,
     detect_harmonization_columns,
-    extract_harmony_tokens,
+    parse_harmony_structure,
 )
-from chordia.scales import ROMAN_DEGREES, build_scale, parse_scale_steps, step_to_label
+from chordia.scales import ROMAN_DEGREES, build_scale, detect_scale_columns, parse_scale_steps, step_to_label
 
 
 class ChordiaPDF(FPDF):
@@ -224,6 +224,7 @@ def build_info_pdf(title: str, body_lines: list[str], app_public_url: str) -> by
 
 def build_harmonization_pdf(
     harmony_df: pd.DataFrame,
+    scales_df: pd.DataFrame,
     selected_types: list[str],
     root_note: str,
     app_public_url: str,
@@ -232,8 +233,11 @@ def build_harmonization_pdf(
     pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=True, margin=35)
 
-    type_col, struct_col, degree_cols, harmony_col = detect_harmonization_columns(harmony_df)
+    type_col, struct_col, _, _ = detect_harmonization_columns(harmony_df)
     if not type_col or not struct_col:
+        return pdf.output()
+    scale_type_col, scale_struct_col = detect_scale_columns(scales_df)
+    if not scale_type_col or not scale_struct_col:
         return pdf.output()
 
     for scale_type in selected_types:
@@ -241,12 +245,17 @@ def build_harmonization_pdf(
         if matches.empty:
             continue
         row = matches.iloc[0]
-        raw_structure = str(row.get(struct_col, "")).strip()
+        harmony_structure = str(row.get(struct_col, "")).strip()
+        harmony_tokens = parse_harmony_structure(harmony_structure)
+        if len(harmony_tokens) != 7:
+            continue
+
+        scale_match = scales_df[scales_df[scale_type_col].astype(str).str.strip() == str(scale_type).strip()]
+        if scale_match.empty:
+            continue
+        raw_structure = str(scale_match.iloc[0].get(scale_struct_col, "")).strip()
         steps = parse_scale_steps(raw_structure)
         if not steps:
-            continue
-        harmony_tokens = extract_harmony_tokens(row, degree_cols, harmony_col)
-        if len(harmony_tokens) != 7:
             continue
         notes, chords = build_harmonized_chords(root_note, steps, harmony_tokens)
 

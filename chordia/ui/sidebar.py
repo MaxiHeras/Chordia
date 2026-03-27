@@ -350,6 +350,7 @@ def render_sidebar(
                 return None
             return build_harmonization_pdf(
                 harmony_df=harmony_df,
+                scales_df=scales_df,
                 selected_types=selected_types,
                 root_note=st.session_state.get("arm_root", "C"),
                 app_public_url=_app_public_url(),

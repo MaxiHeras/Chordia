@@ -67,6 +67,10 @@ def _extract_tokens_from_string(raw_value: str) -> list[str]:
     return tokens
 
 
+def parse_harmony_structure(raw_value: str) -> list[str]:
+    return _extract_tokens_from_string(raw_value)
+
+
 def extract_harmony_tokens(row: pd.Series, degree_cols: list[str] | None, harmony_col: str | None) -> list[str]:
     if degree_cols:
         tokens = [str(row.get(col, "")).strip() for col in degree_cols]
