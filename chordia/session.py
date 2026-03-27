@@ -16,6 +16,12 @@ def ensure_session_defaults() -> None:
         st.session_state.descargado = False
     if "filtro_alteracion" not in st.session_state:
         st.session_state.filtro_alteracion = "Nat."
+    if "filtro_alteracion_escalas" not in st.session_state:
+        st.session_state.filtro_alteracion_escalas = "Nat."
+    if "scale_root" not in st.session_state:
+        st.session_state.scale_root = "C"
+    if "scales_selected_types" not in st.session_state:
+        st.session_state.scales_selected_types = []
 
 
 def select_all_types(opciones: list[str]) -> None:

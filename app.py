@@ -3,7 +3,7 @@
 import streamlit as st
 
 from chordia.config import PAGE_TITLE
-from chordia.data import load_chords
+from chordia.data import load_chords, load_scales
 from chordia.session import ensure_session_defaults
 from chordia.styles import inject_custom_css
 from chordia.ui.main_panel import render_main
@@ -23,11 +23,12 @@ def main() -> None:
     if df is None:
         st.error("No se pudieron cargar los datos. Reintentá más tarde.")
         return
+    scales_df = load_scales()
 
     with st.sidebar:
-        modo, raiz_sel, df_raiz = render_sidebar(df)
+        modo, raiz_sel, df_raiz = render_sidebar(df, scales_df)
 
-    render_main(modo, df, raiz_sel, df_raiz)
+    render_main(modo, df, raiz_sel, df_raiz, scales_df)
 
 
 if __name__ == "__main__":
