@@ -286,9 +286,12 @@ def render_sidebar(
     """
     st.subheader("Seleccionar Modo")
     modo_previo = st.session_state.get("modo_actual", MODE_DICTIONARY)
+    mode_options = [MODE_IDENTIFIER, MODE_DICTIONARY, MODE_SCALES, MODE_SCALE_HARMONIZATION]
+    mode_index = mode_options.index(modo_previo) if modo_previo in mode_options else 1
     modo = st.radio(
         " ",
-        [MODE_IDENTIFIER, MODE_DICTIONARY, MODE_SCALES, MODE_SCALE_HARMONIZATION],
+        mode_options,
+        index=mode_index,
         label_visibility="collapsed",
     )
     st.session_state.modo_actual = modo
@@ -322,6 +325,7 @@ def render_sidebar(
 
         _render_pdf_controls(_build_dict_pdf, f"Acordes_{raiz_sel}.pdf")
         render_share_section()
+        _render_mobile_view_mode_switch()
         return modo, raiz_sel, df_raiz
 
     if modo == MODE_SCALES:
@@ -390,4 +394,5 @@ def render_sidebar(
 
     _render_pdf_controls(_build_identifier_pdf, "Identificador_de_acorde.pdf")
     render_share_section()
+    _render_mobile_view_mode_switch()
     return modo, "", None
