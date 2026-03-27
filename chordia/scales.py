@@ -150,7 +150,7 @@ def build_scale(root_note: str, step_pattern: list[int]) -> list[str]:
 
 def render_scale_grid(notes: list[str], steps: list[int]) -> None:
     # 15 columnas: nota/intervalo alternadas, y una nota final sin intervalo.
-    html = ['<div class="scale-grid">']
+    html = ['<div class="scale-grid-wrap"><div class="scale-grid">']
 
     # Fila 1: grados romanos sobre las notas.
     for i, deg in enumerate(ROMAN_DEGREES):
@@ -164,6 +164,6 @@ def render_scale_grid(notes: list[str], steps: list[int]) -> None:
     for i, val in enumerate(steps):
         html.append(f'<div class="scale-step c{2 * i + 2}">{step_to_label(val)}</div>')
 
-    html.append("</div>")
+    html.append("</div></div>")
     st.markdown("".join(html), unsafe_allow_html=True)
 

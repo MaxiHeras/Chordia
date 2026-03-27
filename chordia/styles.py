@@ -39,6 +39,12 @@ def inject_custom_css() -> None:
         align-items: center;
         margin-top: 10px;
         margin-bottom: 6px;
+        min-width: 840px;
+    }
+    .scale-grid-wrap {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
     }
     .scale-degree {
         text-align: center;
@@ -77,6 +83,7 @@ def inject_custom_css() -> None:
         gap: 6px 10px;
         margin-top: 8px;
         margin-bottom: 4px;
+        min-width: 680px;
     }
     .harmony-chords-row {
         display: grid;
@@ -84,6 +91,12 @@ def inject_custom_css() -> None:
         gap: 8px 10px;
         margin-top: 0;
         margin-bottom: 8px;
+        min-width: 680px;
+    }
+    .harmony-wrap {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
     }
     .harmony-degree {
         text-align: center;
@@ -106,6 +119,18 @@ def inject_custom_css() -> None:
     .c1 { grid-column: 1; } .c2 { grid-column: 2; } .c3 { grid-column: 3; } .c4 { grid-column: 4; } .c5 { grid-column: 5; }
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }
     .c11 { grid-column: 11; } .c12 { grid-column: 12; } .c13 { grid-column: 13; } .c14 { grid-column: 14; } .c15 { grid-column: 15; }
+
+    @media (max-width: 768px) {
+        .block-container { padding-top: 0.5rem !important; }
+        .scale-grid { min-width: 760px; gap: 5px; }
+        .scale-note { min-height: 38px; font-size: 0.85rem; padding: 6px 3px; }
+        .scale-degree { font-size: 0.8rem; }
+        .scale-step { font-size: 0.72rem; padding: 3px 2px; }
+        .scale-structure-caption { margin-top: 18px; font-size: 0.82rem; }
+        .harmony-degrees-row, .harmony-chords-row { min-width: 620px; gap: 6px 8px; }
+        .harmony-degree { font-size: 0.8rem; }
+        .harmony-chord { min-height: 34px; font-size: 0.82rem; padding: 6px 3px; }
+    }
     </style>
 """,
         unsafe_allow_html=True,

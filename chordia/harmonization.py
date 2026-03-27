@@ -120,13 +120,13 @@ def render_harmonization_result(
     )
     st.markdown("**Acordes de la escala armonizada**")
 
-    items = ['<div class="harmony-degrees-row">']
+    items = ['<div class="harmony-wrap"><div class="harmony-degrees-row">']
     for i, deg in enumerate(ROMAN_DEGREES[:-1]):
         items.append(f'<div class="harmony-degree">{deg}</div>')
     items.append("</div>")
     items.append('<div class="harmony-chords-row">')
     for i, _ in enumerate(ROMAN_DEGREES[:-1]):
         items.append(f'<div class="harmony-chord">{chords[i]}</div>')
-    items.append("</div>")
+    items.append("</div></div>")
     st.markdown("".join(items), unsafe_allow_html=True)
 
