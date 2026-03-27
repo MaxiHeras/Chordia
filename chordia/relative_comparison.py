@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import pandas as pd
+
 from chordia.scales import ROMAN_DEGREES, build_scale, roots_for_alteration
 from chordia.scales import _note_pitch_class  # noqa: SLF001
 
@@ -125,11 +127,113 @@ def relative_major_option(minor_root: str, root_options: list[str]) -> str:
     return pick_root_for_pc(maj_pc, root_options)
 
 
-def rel_comp_root_options(filtro: str, maj_root: str, min_root: str) -> list[str]:
+_MAYOR_COL_CANDIDATES = ("Mayor", "MAYOR")
+_MENOR_COL_CANDIDATES = ("Menor", "MENOR", "Menor relativa", "Relativa menor")
+
+
+def _match_sheet_column(columns: list[str], candidates: tuple[str, ...]) -> str | None:
+    for raw in columns:
+        norm = str(raw).strip()
+        for cand in candidates:
+            if norm.lower() == cand.strip().lower():
+                return norm
+    return None
+
+
+@dataclass(frozen=True)
+class RelativeKeyPairs:
+    """Pares leídos de Sheets: orden de filas define el orden de los desplegables."""
+
+    majors_in_order: tuple[str, ...]
+    major_to_minor: dict[str, str]
+    minor_to_major: dict[str, str]
+
+
+def build_relative_key_pairs(df: pd.DataFrame | None) -> RelativeKeyPairs | None:
+    if df is None or df.empty:
+        return None
+    maj_c = _match_sheet_column(list(df.columns), _MAYOR_COL_CANDIDATES)
+    men_c = _match_sheet_column(list(df.columns), _MENOR_COL_CANDIDATES)
+    if not maj_c or not men_c:
+        return None
+    rows: list[tuple[str, str]] = []
+    for _, r in df.iterrows():
+        ra = r.get(maj_c)
+        rm = r.get(men_c)
+        maj = str(ra).strip() if pd.notna(ra) else ""
+        men = str(rm).strip() if pd.notna(rm) else ""
+        if maj and men:
+            rows.append((maj, men))
+    if not rows:
+        return None
+    major_to_minor: dict[str, str] = {}
+    majors_order: list[str] = []
+    for maj, men in rows:
+        if maj not in major_to_minor:
+            major_to_minor[maj] = men
+            majors_order.append(maj)
+    minor_to_major: dict[str, str] = {}
+    for maj, men in rows:
+        minor_to_major[men] = maj
+    return RelativeKeyPairs(tuple(majors_order), major_to_minor, minor_to_major)
+
+
+def first_major_for_filter(filtro: str, pairs: RelativeKeyPairs | None) -> str:
+    allowed = roots_for_alteration(filtro)
+    if pairs is not None:
+        for m in pairs.majors_in_order:
+            if m in allowed:
+                return m
+    return allowed[0]
+
+
+def _rel_opts_from_sheet(
+    filtro: str,
+    pairs: RelativeKeyPairs,
+    maj_root: str,
+    min_root: str,
+) -> list[str]:
+    allowed = set(roots_for_alteration(filtro))
+    majors = [m for m in pairs.majors_in_order if m in allowed]
+    if not majors:
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for m in majors:
+        mn = pairs.major_to_minor.get(m, "")
+        for note in (m, mn):
+            if note and note not in seen:
+                out.append(note)
+                seen.add(note)
+    for n in (maj_root, min_root):
+        if n and n not in seen:
+            out.append(n)
+            seen.add(n)
+    exp_mn = pairs.major_to_minor.get(maj_root)
+    if exp_mn and exp_mn not in seen:
+        out.append(exp_mn)
+        seen.add(exp_mn)
+    exp_maj = pairs.minor_to_major.get(min_root)
+    if exp_maj and exp_maj not in seen:
+        out.append(exp_maj)
+        seen.add(exp_maj)
+    return out
+
+
+def rel_comp_root_options(
+    filtro: str,
+    maj_root: str,
+    min_root: str,
+    pairs: RelativeKeyPairs | None = None,
+) -> list[str]:
     """
-    Igual que Diccionario: solo las 7 tónicas del filtro (Nat./Sost./Bem.),
-    más las notas necesarias para mostrar el par relativo (p. ej. F# con A en Nat.).
+    Opciones del desplegable: desde la hoja Mayor/Menor si existe y hay filas del filtro,
+    si no como antes (7 del filtro + enarmónicas del par teórico).
     """
+    if pairs is not None:
+        sheet_opts = _rel_opts_from_sheet(filtro, pairs, maj_root, min_root)
+        if sheet_opts:
+            return sheet_opts
     base = roots_for_alteration(filtro)
     out: list[str] = list(base)
     seen = set(base)
@@ -145,24 +249,54 @@ def rel_comp_root_options(filtro: str, maj_root: str, min_root: str) -> list[str
     return out
 
 
-def sync_minor_from_major_for_options(major_root: str, filtro: str, min_root: str) -> str:
+def sync_minor_from_major_for_options(
+    major_root: str,
+    filtro: str,
+    min_root: str,
+    pairs: RelativeKeyPairs | None = None,
+) -> str:
+    if pairs is not None and major_root in pairs.major_to_minor:
+        spelled = pairs.major_to_minor[major_root]
+        opts = rel_comp_root_options(filtro, major_root, min_root, pairs)
+        if spelled in opts:
+            return spelled
+        return pick_root_for_pc(_note_pitch_class(spelled), opts)
     spelled = relative_minor_from_major(major_root)
-    opts = rel_comp_root_options(filtro, major_root, min_root)
+    opts = rel_comp_root_options(filtro, major_root, min_root, pairs)
     if spelled in opts:
         return spelled
     return pick_root_for_pc(_note_pitch_class(spelled), opts)
 
 
-def sync_major_from_minor_for_options(minor_root: str, filtro: str, maj_root: str) -> str:
+def sync_major_from_minor_for_options(
+    minor_root: str,
+    filtro: str,
+    maj_root: str,
+    pairs: RelativeKeyPairs | None = None,
+) -> str:
+    if pairs is not None and minor_root in pairs.minor_to_major:
+        spelled = pairs.minor_to_major[minor_root]
+        opts = rel_comp_root_options(filtro, maj_root, minor_root, pairs)
+        if spelled in opts:
+            return spelled
+        return pick_root_for_pc(_note_pitch_class(spelled), opts)
     spelled = relative_major_from_minor(minor_root)
-    opts = rel_comp_root_options(filtro, maj_root, minor_root)
+    opts = rel_comp_root_options(filtro, maj_root, minor_root, pairs)
     if spelled in opts:
         return spelled
     return pick_root_for_pc(_note_pitch_class(spelled), opts)
 
 
-def rel_comp_pair_is_consistent(maj_root: str, min_root: str) -> bool:
-    """True si menor es la relativa de mayor o mayor la de menor (misma clase de altura)."""
+def rel_comp_pair_is_consistent(
+    maj_root: str,
+    min_root: str,
+    pairs: RelativeKeyPairs | None = None,
+) -> bool:
+    """True si el par coincide con Sheets (si aplica) o con la relativa teórica."""
+    if pairs is not None and maj_root in pairs.major_to_minor:
+        return _note_pitch_class(min_root) == _note_pitch_class(pairs.major_to_minor[maj_root])
+    if pairs is not None and min_root in pairs.minor_to_major:
+        return _note_pitch_class(maj_root) == _note_pitch_class(pairs.minor_to_major[min_root])
     return (
         _note_pitch_class(min_root) == _note_pitch_class(relative_minor_from_major(maj_root))
         or _note_pitch_class(maj_root) == _note_pitch_class(relative_major_from_minor(min_root))

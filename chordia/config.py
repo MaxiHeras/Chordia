@@ -23,6 +23,13 @@ HARMONIZATION_SHEET_CANDIDATES = (
     "Armonizacion de escalas",
     "ARMONIZACION DE ESCALAS",
 )
+# Pares tónica mayor / relativa menor para el modo "Relativas y comparación".
+RELATIVE_COMPARISON_SHEET_CANDIDATES = (
+    "Relativas y comparación",
+    "Relativas y comparacion",
+    "RELATIVAS Y COMPARACION",
+    "Relativas Y Comparacion",
+)
 
 # Diagramas servidos desde raw GitHub de este repo (carpetas MAYOR, MENOR, … en la raíz).
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/MaxiHeras/Chordia/main"

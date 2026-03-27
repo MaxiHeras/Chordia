@@ -22,6 +22,8 @@ from chordia.constants import (
 from chordia.harmonization import detect_harmonization_columns
 from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, build_scales_pdf, build_selection_pdf
 from chordia.relative_comparison import (
+    RelativeKeyPairs,
+    first_major_for_filter,
     rel_comp_pair_is_consistent,
     rel_comp_root_options,
     sync_major_from_minor_for_options,
@@ -210,7 +212,7 @@ def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selectio
     c2.button("Limpiar", on_click=lambda: st.session_state.update({"arm_selected_types": []}), use_container_width=True, key="arm_clear_all")
 
 
-def render_relative_comparison_sidebar() -> None:
+def render_relative_comparison_sidebar(rel_keys: RelativeKeyPairs | None = None) -> None:
     st.radio(
         "Filtrar alteración:",
         ["Nat.", "Sost.", "Bem."],
@@ -219,36 +221,41 @@ def render_relative_comparison_sidebar() -> None:
         help="Solo una convención a la vez (comportamiento excluyente).",
     )
     filt = st.session_state.filtro_alteracion_rel
-    base = roots_for_alteration(filt)
+    if rel_keys is None:
+        st.caption(
+            "No se encontró la hoja de parejas en Google Sheets "
+            "(nombre sugerido: *Relativas y comparación*). Se usan relativas teóricas."
+        )
     if st.session_state.get("_rel_comp_filt_marker") != filt:
         st.session_state._rel_comp_filt_marker = filt
-        st.session_state.rel_comp_maj_root = base[0]
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(base[0], filt, base[0])
+        first_maj = first_major_for_filter(filt, rel_keys)
+        st.session_state.rel_comp_maj_root = first_maj
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(first_maj, filt, first_maj, rel_keys)
         st.session_state._rel_comp_last_edit = "maj"
         st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
         st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
 
     maj = st.session_state.rel_comp_maj_root
     mn = st.session_state.rel_comp_min_root
-    if not rel_comp_pair_is_consistent(maj, mn):
+    if not rel_comp_pair_is_consistent(maj, mn, rel_keys):
         if st.session_state.get("_rel_comp_last_edit") == "min":
-            st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn, filt, maj)
+            st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn, filt, maj, rel_keys)
         else:
-            st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
+            st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
         maj = st.session_state.rel_comp_maj_root
         mn = st.session_state.rel_comp_min_root
 
-    opts = rel_comp_root_options(filt, maj, mn)
+    opts = rel_comp_root_options(filt, maj, mn, rel_keys)
     if maj not in opts:
-        st.session_state.rel_comp_maj_root = base[0]
+        st.session_state.rel_comp_maj_root = first_major_for_filter(filt, rel_keys)
         maj = st.session_state.rel_comp_maj_root
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
         mn = st.session_state.rel_comp_min_root
         st.session_state._rel_comp_last_edit = "maj"
     if mn not in opts:
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
         mn = st.session_state.rel_comp_min_root
-    opts = rel_comp_root_options(filt, maj, mn)
+    opts = rel_comp_root_options(filt, maj, mn, rel_keys)
 
     if "_rel_snapshot_maj" not in st.session_state:
         st.session_state._rel_snapshot_maj = maj
@@ -266,17 +273,21 @@ def render_relative_comparison_sidebar() -> None:
     )
     maj2 = st.session_state.rel_comp_maj_root
     if maj2 != st.session_state._rel_snapshot_maj:
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj2, filt, st.session_state.rel_comp_min_root)
+        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+            maj2, filt, st.session_state.rel_comp_min_root, rel_keys
+        )
         st.session_state._rel_comp_last_edit = "maj"
         st.session_state._rel_snapshot_maj = maj2
         st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
 
-    opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root)
+    opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root, rel_keys)
     if st.session_state.rel_comp_min_root not in opts:
         st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
-            st.session_state.rel_comp_maj_root, filt, st.session_state.rel_comp_min_root
+            st.session_state.rel_comp_maj_root, filt, st.session_state.rel_comp_min_root, rel_keys
         )
-        opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root)
+        opts = rel_comp_root_options(
+            filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root, rel_keys
+        )
 
     st.selectbox(
         "Raíz modo menor (relativa)",
@@ -286,7 +297,9 @@ def render_relative_comparison_sidebar() -> None:
     )
     mn2 = st.session_state.rel_comp_min_root
     if mn2 != st.session_state._rel_snapshot_min:
-        st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn2, filt, st.session_state.rel_comp_maj_root)
+        st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(
+            mn2, filt, st.session_state.rel_comp_maj_root, rel_keys
+        )
         st.session_state._rel_comp_last_edit = "min"
         st.session_state._rel_snapshot_min = mn2
         st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
@@ -362,6 +375,7 @@ def render_sidebar(
     df: pd.DataFrame,
     scales_df: pd.DataFrame | None,
     harmony_df: pd.DataFrame | None,
+    rel_keys: RelativeKeyPairs | None = None,
 ) -> tuple[str, str, pd.DataFrame | None]:
     """
     Devuelve (modo, raiz_sel, df_raiz).
@@ -467,7 +481,7 @@ def render_sidebar(
         return modo, "", None
 
     if modo == MODE_RELATIVE_COMPARISON:
-        render_relative_comparison_sidebar()
+        render_relative_comparison_sidebar(rel_keys)
 
         def _build_rel_pdf() -> bytes | None:
             maj = st.session_state.get("rel_comp_maj_root", "C")
