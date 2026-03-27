@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+.env
+*.egg-info/
+.dist/
+.idea/
+.vscode/
+.streamlit/secrets.toml
+_ref_diccionario/
