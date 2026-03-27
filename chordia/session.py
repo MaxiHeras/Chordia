@@ -42,6 +42,8 @@ def ensure_session_defaults() -> None:
         st.session_state.rel_comp_maj_root = "C"
     if "rel_comp_min_root" not in st.session_state:
         st.session_state.rel_comp_min_root = "A"
+    if "rel_comp_sidebar_mode" not in st.session_state:
+        st.session_state.rel_comp_sidebar_mode = "Mayor"
     if "mobile_content_view_mode" not in st.session_state:
         st.session_state.mobile_content_view_mode = "completa"
 

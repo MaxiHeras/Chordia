@@ -24,8 +24,6 @@ from chordia.pdf import build_harmonization_pdf, build_relative_comparison_pdf, 
 from chordia.relative_comparison import (
     RelativeKeyPairs,
     first_major_for_filter,
-    rel_comp_pair_is_consistent,
-    rel_comp_root_options,
     sync_major_from_minor_for_options,
     sync_minor_from_major_for_options,
 )
@@ -221,6 +219,7 @@ def render_relative_comparison_sidebar(rel_keys: RelativeKeyPairs | None = None)
         help="Solo una convención a la vez (comportamiento excluyente).",
     )
     filt = st.session_state.filtro_alteracion_rel
+    roots = roots_for_alteration(filt)
     if rel_keys is None:
         st.caption(
             "No se encontró la hoja de parejas en Google Sheets "
@@ -231,79 +230,48 @@ def render_relative_comparison_sidebar(rel_keys: RelativeKeyPairs | None = None)
         first_maj = first_major_for_filter(filt, rel_keys)
         st.session_state.rel_comp_maj_root = first_maj
         st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(first_maj, filt, first_maj, rel_keys)
-        st.session_state._rel_comp_last_edit = "maj"
-        st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
-        st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
 
-    maj = st.session_state.rel_comp_maj_root
-    mn = st.session_state.rel_comp_min_root
-    if not rel_comp_pair_is_consistent(maj, mn, rel_keys):
-        if st.session_state.get("_rel_comp_last_edit") == "min":
-            st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(mn, filt, maj, rel_keys)
-        else:
-            st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
-        maj = st.session_state.rel_comp_maj_root
-        mn = st.session_state.rel_comp_min_root
-
-    opts = rel_comp_root_options(filt, maj, mn, rel_keys)
-    if maj not in opts:
-        st.session_state.rel_comp_maj_root = first_major_for_filter(filt, rel_keys)
-        maj = st.session_state.rel_comp_maj_root
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
-        mn = st.session_state.rel_comp_min_root
-        st.session_state._rel_comp_last_edit = "maj"
-    if mn not in opts:
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(maj, filt, mn, rel_keys)
-        mn = st.session_state.rel_comp_min_root
-    opts = rel_comp_root_options(filt, maj, mn, rel_keys)
-
-    if "_rel_snapshot_maj" not in st.session_state:
-        st.session_state._rel_snapshot_maj = maj
-        st.session_state._rel_snapshot_min = mn
-
-    # No usar on_change en los selectbox: en Streamlit el callback puede leer
-    # rel_comp_maj_root antes de que se aplique el valor nuevo, y la relativa
-    # menor queda calculada con la raíz mayor *anterior* (p. ej. C + C# al bajar
-    # de E mayor). Tras el selectbox de mayor, el estado ya tiene la raíz correcta.
-    st.selectbox(
-        "Raíz modo mayor",
-        opts,
-        key="rel_comp_maj_root",
-        help="Al cambiar, se actualiza la relativa menor.",
+    st.radio(
+        "Modo de la raíz:",
+        ["Mayor", "Menor"],
+        horizontal=True,
+        key="rel_comp_sidebar_mode",
+        help="Elegí si la nota del desplegable es la tónica mayor o la tónica menor (solo una opción a la vez).",
     )
-    maj2 = st.session_state.rel_comp_maj_root
-    if maj2 != st.session_state._rel_snapshot_maj:
-        st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
-            maj2, filt, st.session_state.rel_comp_min_root, rel_keys
-        )
-        st.session_state._rel_comp_last_edit = "maj"
-        st.session_state._rel_snapshot_maj = maj2
-        st.session_state._rel_snapshot_min = st.session_state.rel_comp_min_root
+    mode = st.session_state.rel_comp_sidebar_mode
 
-    opts = rel_comp_root_options(filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root, rel_keys)
-    if st.session_state.rel_comp_min_root not in opts:
+    if mode == "Mayor":
+        if st.session_state.rel_comp_maj_root not in roots:
+            st.session_state.rel_comp_maj_root = roots[0]
+            st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
+                st.session_state.rel_comp_maj_root, filt, st.session_state.rel_comp_min_root, rel_keys
+            )
+        st.selectbox(
+            "Raíz seleccionada (modo mayor)",
+            roots,
+            key="rel_comp_maj_root",
+            help="Las 7 tónicas del filtro; la relativa menor se calcula abajo.",
+        )
         st.session_state.rel_comp_min_root = sync_minor_from_major_for_options(
             st.session_state.rel_comp_maj_root, filt, st.session_state.rel_comp_min_root, rel_keys
         )
-        opts = rel_comp_root_options(
-            filt, st.session_state.rel_comp_maj_root, st.session_state.rel_comp_min_root, rel_keys
+        st.info(f"Tonalidad menor relativa: **{st.session_state.rel_comp_min_root}**")
+    else:
+        if st.session_state.rel_comp_min_root not in roots:
+            st.session_state.rel_comp_min_root = roots[0]
+            st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(
+                st.session_state.rel_comp_min_root, filt, st.session_state.rel_comp_maj_root, rel_keys
+            )
+        st.selectbox(
+            "Raíz seleccionada (modo menor)",
+            roots,
+            key="rel_comp_min_root",
+            help="Las 7 tónicas del filtro; la relativa mayor se calcula abajo.",
         )
-
-    st.selectbox(
-        "Raíz modo menor (relativa)",
-        opts,
-        key="rel_comp_min_root",
-        help="Al cambiar, se actualiza la relativa mayor.",
-    )
-    mn2 = st.session_state.rel_comp_min_root
-    if mn2 != st.session_state._rel_snapshot_min:
         st.session_state.rel_comp_maj_root = sync_major_from_minor_for_options(
-            mn2, filt, st.session_state.rel_comp_maj_root, rel_keys
+            st.session_state.rel_comp_min_root, filt, st.session_state.rel_comp_maj_root, rel_keys
         )
-        st.session_state._rel_comp_last_edit = "min"
-        st.session_state._rel_snapshot_min = mn2
-        st.session_state._rel_snapshot_maj = st.session_state.rel_comp_maj_root
-        st.rerun()
+        st.info(f"Tonalidad mayor relativa: **{st.session_state.rel_comp_maj_root}**")
 
 
 def render_share_section() -> None:
