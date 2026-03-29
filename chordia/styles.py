@@ -274,13 +274,13 @@ def inject_custom_css() -> None:
     }
 
     @media (max-width: 768px) {
-        /* Títulos lo más arriba posible sin solaparse con la toolbar; notch vía safe-area */
-        .block-container { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
-        .main .block-container { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
-        [data-testid="block-container"] { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
+        /* Aire mínimo + un poco extra para que emojis en títulos (🔍, etc.) no queden cortados arriba */
+        .block-container { padding-top: calc(1.58rem + env(safe-area-inset-top, 0px)) !important; }
+        .main .block-container { padding-top: calc(1.58rem + env(safe-area-inset-top, 0px)) !important; }
+        [data-testid="block-container"] { padding-top: calc(1.58rem + env(safe-area-inset-top, 0px)) !important; }
         .main h1, .main h2, .main h3 {
-            padding-top: 0.1rem !important;
-            margin-top: 0.2rem !important;
+            padding-top: 0.2rem !important;
+            margin-top: 0.28rem !important;
         }
         .scale-grid { min-width: 760px; gap: 5px; }
         .scale-note { min-height: 38px; font-size: 0.85rem; padding: 6px 3px; }
