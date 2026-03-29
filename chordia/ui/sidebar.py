@@ -118,32 +118,13 @@ def render_identifier_sidebar() -> None:
 
 
 def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool = False) -> None:
-    st.write("Filtrar Alteración:")
-    f_cols = st.columns(3)
-    nat = f_cols[0].checkbox(
-        "Nat.",
-        value=(st.session_state.filtro_alteracion_escalas == "Nat."),
-        key="scales_nat",
+    st.radio(
+        "Filtrar Alteración:",
+        ["Nat.", "Sost.", "Bem."],
+        horizontal=True,
+        key="filtro_alteracion_escalas",
+        help="Solo una convención a la vez.",
     )
-    sost = f_cols[1].checkbox(
-        "Sost.",
-        value=(st.session_state.filtro_alteracion_escalas == "Sost."),
-        key="scales_sost",
-    )
-    bem = f_cols[2].checkbox(
-        "Bem.",
-        value=(st.session_state.filtro_alteracion_escalas == "Bem."),
-        key="scales_bem",
-    )
-
-    if nat and st.session_state.filtro_alteracion_escalas != "Nat.":
-        st.session_state.filtro_alteracion_escalas = "Nat."
-    elif sost and st.session_state.filtro_alteracion_escalas != "Sost.":
-        st.session_state.filtro_alteracion_escalas = "Sost."
-    elif bem and st.session_state.filtro_alteracion_escalas != "Bem.":
-        st.session_state.filtro_alteracion_escalas = "Bem."
-    elif not nat and not sost and not bem:
-        st.session_state.filtro_alteracion_escalas = "Nat."
 
     root_options = roots_for_alteration(st.session_state.filtro_alteracion_escalas)
     default_index = root_options.index(st.session_state.scale_root) if st.session_state.scale_root in root_options else 0
@@ -194,20 +175,13 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool 
 
 
 def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selection: bool = False) -> None:
-    st.write("Filtrar Alteración:")
-    f_cols = st.columns(3)
-    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion_arm == "Nat."), key="arm_nat")
-    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion_arm == "Sost."), key="arm_sost")
-    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion_arm == "Bem."), key="arm_bem")
-
-    if nat and st.session_state.filtro_alteracion_arm != "Nat.":
-        st.session_state.filtro_alteracion_arm = "Nat."
-    elif sost and st.session_state.filtro_alteracion_arm != "Sost.":
-        st.session_state.filtro_alteracion_arm = "Sost."
-    elif bem and st.session_state.filtro_alteracion_arm != "Bem.":
-        st.session_state.filtro_alteracion_arm = "Bem."
-    elif not nat and not sost and not bem:
-        st.session_state.filtro_alteracion_arm = "Nat."
+    st.radio(
+        "Filtrar Alteración:",
+        ["Nat.", "Sost.", "Bem."],
+        horizontal=True,
+        key="filtro_alteracion_arm",
+        help="Solo una convención a la vez.",
+    )
 
     root_options = roots_for_alteration(st.session_state.filtro_alteracion_arm)
     default_index = root_options.index(st.session_state.arm_root) if st.session_state.arm_root in root_options else 0
