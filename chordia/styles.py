@@ -20,8 +20,33 @@ def inject_custom_css() -> None:
         .chord-img-web { filter: invert(1) hue-rotate(180deg); }
     }
     .scroll-container { display: flex !important; overflow-x: auto !important; gap: 15px !important; padding: 10px 0 !important; flex-wrap: nowrap !important; }
-    .chord-diag-item { flex: 0 0 auto !important; width: 150px !important; text-align: center; }
-    .chord-img-web { width: 100% !important; height: auto !important; }
+    .chord-diag-item {
+        flex: 0 0 auto !important;
+        width: 150px !important;
+        text-align: center;
+    }
+    /* Misma proporción que el PDF (38×45 mm): cualquier PNG encaja sin distorsión */
+    .chord-diag-frame {
+        width: 150px !important;
+        aspect-ratio: 38 / 45 !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box;
+    }
+    .chord-img-web {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        object-position: center !important;
+        display: block !important;
+    }
+    .chord-diag-caption {
+        font-size: 12px;
+        color: gray;
+        margin: 4px 0 0 0 !important;
+    }
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 5px !important; }
     [data-testid="stSidebar"] [data-testid="column"] { width: 32% !important; flex: 1 1 32% !important; min-width: 32% !important; }
     .stButton > button { width: 100% !important; padding: 5px 2px !important; font-size: 13px !important; min-height: 42px !important; border-radius: 6px !important; }
@@ -451,6 +476,9 @@ def inject_custom_css() -> None:
     }
     [data-theme="dark"] .harmony-chord {
         color: #f8fafc !important;
+    }
+    [data-theme="dark"] .chord-diag-caption {
+        color: #94a3b8 !important;
     }
 
     /* Mismo aspecto si el SO está en oscuro (refuerzo si falta data-theme en el árbol del markdown). */

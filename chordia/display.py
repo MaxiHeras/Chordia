@@ -30,8 +30,9 @@ def render_chord_detail(row: pd.Series, github_raw_base: str) -> None:
             img_name = v.split("/")[-1].replace("#", "SOS")
             url = f"{github_raw_base}/{nat_cod}/{img_name}"
             h_items += (
-                f'<div class="chord-diag-item"><img src="{url}" class="chord-img-web">'
-                f'<p style="font-size:12px;color:gray;">P{j}</p></div>'
+                f'<div class="chord-diag-item">'
+                f'<div class="chord-diag-frame"><img src="{url}" class="chord-img-web" alt=""></div>'
+                f'<p class="chord-diag-caption">P{j}</p></div>'
             )
     if h_items:
         st.markdown(f'<div class="scroll-container">{h_items}</div>', unsafe_allow_html=True)

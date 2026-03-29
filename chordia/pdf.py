@@ -60,35 +60,48 @@ def _draw_chord_section(
     github_raw_base: str,
     print_mode: str,
 ) -> None:
+    # Layout (mm): mismo margen izquierdo para texto y rejilla; mismo hueco vertical
+    # entre líneas de datos, entre bloque texto y diagramas, y entre filas de diagramas.
+    _MARGIN_X = 15
+    _TEXT_LINE_H = 6
+    _GAP_AFTER_TITLE = 8
+    _VERTICAL_RHYTHM = 12
+    _GAP_X = 8
+    _COLS = 4
+    _DIAG_W, _DIAG_H = 38, 45
+
     diag_values: list[str] = []
     for i in range(1, DIAGRAM_COUNT + 1):
         val = str(row.get(f"Diagrama{i}", "nan")).strip()
         if val.lower().endswith(".png"):
             diag_values.append(val)
 
-    # Altura aproximada para decidir salto de página en modo continuo.
-    diag_rows = max(1, (len(diag_values) + 3) // 4) if diag_values else 1
-    needed_height = 70 + (diag_rows * 57)
+    diag_rows = max(1, (len(diag_values) + _COLS - 1) // _COLS) if diag_values else 1
+    row_stride = _DIAG_H + _VERTICAL_RHYTHM
+    needed_height = 70 + (diag_rows * row_stride)
     _ensure_space(pdf, needed_height, print_mode)
 
     pdf.set_font("helvetica", "B", 24)
     pdf.cell(0, 20, f"{row['Raiz']} {row['Naturaleza']}", border=1, ln=True, align="C")
-    pdf.ln(8)
+    pdf.ln(_GAP_AFTER_TITLE)
+    pdf.set_x(_MARGIN_X)
     pdf.set_font("helvetica", "B", 11)
-    pdf.write(6, "Notas: ")
+    pdf.write(_TEXT_LINE_H, "Notas: ")
     pdf.set_font("helvetica", "", 11)
-    pdf.write(6, f"{' - '.join(row_note_list(row))}\n")
+    pdf.write(_TEXT_LINE_H, f"{' - '.join(row_note_list(row))}\n")
+    pdf.set_x(_MARGIN_X)
     pdf.set_font("helvetica", "B", 11)
-    pdf.write(6, "Int_IVAN: ")
+    pdf.write(_TEXT_LINE_H, "Int_IVAN: ")
     pdf.set_font("helvetica", "", 11)
-    pdf.write(6, f"{str(row.get('Int_IVAN', 'N/A'))}\n")
+    pdf.write(_TEXT_LINE_H, f"{str(row.get('Int_IVAN', 'N/A'))}\n")
+    pdf.set_x(_MARGIN_X)
     pdf.set_font("helvetica", "B", 11)
-    pdf.write(6, "Int_TRAD: ")
+    pdf.write(_TEXT_LINE_H, "Int_TRAD: ")
     pdf.set_font("helvetica", "", 11)
-    pdf.write(6, f"{str(row.get('Int_TRAD', 'N/A'))}\n")
-    pdf.ln(14)
+    pdf.write(_TEXT_LINE_H, f"{str(row.get('Int_TRAD', 'N/A'))}\n")
+    pdf.ln(_VERTICAL_RHYTHM)
 
-    x_start, gap_x, gap_y, cols, diag_w, diag_h = 15, 8, 12, 4, 38, 45
+    x_start, gap_x, gap_y, cols, diag_w, diag_h = _MARGIN_X, _GAP_X, _VERTICAL_RHYTHM, _COLS, _DIAG_W, _DIAG_H
     y_grid_top = pdf.get_y()
     count = 0
     for val in diag_values:
@@ -102,7 +115,7 @@ def _draw_chord_section(
                 col = count % cols
                 fila = count // cols
                 pos_x = x_start + (col * (diag_w + gap_x))
-                pos_y = y_grid_top + (fila * (diag_h + gap_y))
+                pos_y = y_grid_top + (fila * row_stride)
                 pdf.image(BytesIO(img_data), x=pos_x, y=pos_y, w=diag_w, h=diag_h)
                 count += 1
         except Exception:
@@ -110,7 +123,7 @@ def _draw_chord_section(
 
     # Separación visual entre secciones en modo continuo.
     if print_mode == "continuous":
-        pdf.set_y(max(pdf.get_y(), y_grid_top + (diag_rows * (diag_h + gap_y))))
+        pdf.set_y(max(pdf.get_y(), y_grid_top + (diag_rows * row_stride)))
         pdf.ln(8)
 
 
