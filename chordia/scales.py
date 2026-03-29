@@ -148,6 +148,13 @@ def build_scale(root_note: str, step_pattern: list[int]) -> list[str]:
     return notes
 
 
+def _scale_note_caption(note: str, compact: bool) -> str:
+    """En compacta, una sola etiqueta por celda (evita 'Eb (D#)' aplastado en columnas estrechas)."""
+    if not compact:
+        return note
+    return note.split("(")[0].strip()
+
+
 def render_scale_grid(notes: list[str], steps: list[int], compact: bool = False) -> None:
     # 15 columnas: nota/intervalo alternadas, y una nota final sin intervalo.
     wrapper_class = "scale-grid-wrap compact-mode" if compact else "scale-grid-wrap"
@@ -159,7 +166,8 @@ def render_scale_grid(notes: list[str], steps: list[int], compact: bool = False)
 
     # Fila 2: notas en cuadros.
     for i, note in enumerate(notes):
-        html.append(f'<div class="scale-note c{2 * i + 1}">{note}</div>')
+        caption = _scale_note_caption(note, compact)
+        html.append(f'<div class="scale-note c{2 * i + 1}">{caption}</div>')
 
     # Fila 3: estructura entre notas (T/ST en cuadros).
     step_attr = ' style="white-space:nowrap"' if compact else ""

@@ -8,9 +8,11 @@ def inject_custom_css() -> None:
         """
     <style>
     [data-testid="stSidebarUserContent"] { padding-top: 0.5rem !important; }
-    /* Más aire bajo la barra de Streamlit para que los títulos no queden “cortados” en móvil. */
-    .block-container { padding-top: 2rem !important; padding-bottom: 0rem !important; }
-    .main .block-container { padding-top: 2rem !important; }
+    /* Aire bajo la barra de Streamlit (toolbar + safe area en móvil). */
+    .block-container { padding-top: 2.75rem !important; padding-bottom: 0rem !important; }
+    .main .block-container { padding-top: 2.75rem !important; }
+    [data-testid="block-container"] { padding-top: 2.75rem !important; }
+    .main h1, .main h2, .main h3 { padding-top: 0.35rem !important; margin-top: 0.5rem !important; }
     div[data-testid="stRadio"] > div { gap: 20px; margin-top: 10px; }
     @media (prefers-color-scheme: dark) { .chord-img-web { filter: invert(1) hue-rotate(180deg); } }
     .scroll-container { display: flex !important; overflow-x: auto !important; gap: 15px !important; padding: 10px 0 !important; flex-wrap: nowrap !important; }
@@ -51,16 +53,17 @@ def inject_custom_css() -> None:
     .scale-degree {
         text-align: center;
         font-weight: 600;
-        color: #6b7280;
+        color: var(--text-color, #6b7280);
         font-size: 0.9rem;
     }
     .scale-note {
         text-align: center;
-        border: 1px solid #D1D5DB;
+        border: 1px solid var(--border-color, #D1D5DB);
         border-radius: 8px;
         padding: 8px 4px;
         font-weight: 700;
-        background: rgba(255,255,255,0.5);
+        background: var(--secondary-background-color, rgba(255,255,255,0.65));
+        color: var(--text-color, inherit);
         min-height: 44px;
         display: flex;
         align-items: center;
@@ -69,15 +72,16 @@ def inject_custom_css() -> None:
     .scale-step {
         text-align: center;
         font-size: 0.78rem;
-        color: #6b7280;
+        color: var(--text-color, #6b7280);
         font-weight: 600;
-        border: 1px solid #D1D5DB;
+        border: 1px solid var(--border-color, #D1D5DB);
         border-radius: 8px;
         padding: 4px 2px;
-        background: rgba(255,255,255,0.35);
+        background: var(--secondary-background-color, rgba(255,255,255,0.35));
     }
     .scale-structure-caption {
         margin-top: 26px;
+        color: var(--text-color, inherit);
     }
     .harmony-degrees-row {
         display: grid;
@@ -103,16 +107,17 @@ def inject_custom_css() -> None:
     .harmony-degree {
         text-align: center;
         font-weight: 600;
-        color: #6b7280;
+        color: var(--text-color, #6b7280);
         font-size: 0.9rem;
     }
     .harmony-chord {
         text-align: center;
-        border: 1px solid #D1D5DB;
+        border: 1px solid var(--border-color, #D1D5DB);
         border-radius: 8px;
         padding: 8px 4px;
         font-weight: 700;
-        background: rgba(255,255,255,0.5);
+        background: var(--secondary-background-color, rgba(255,255,255,0.5));
+        color: var(--text-color, inherit);
         min-height: 40px;
         display: flex;
         align-items: center;
@@ -122,29 +127,33 @@ def inject_custom_css() -> None:
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }
     .c11 { grid-column: 11; } .c12 { grid-column: 12; } .c13 { grid-column: 13; } .c14 { grid-column: 14; } .c15 { grid-column: 15; }
 
-    /* Vista compacta (switch "Compacta"): aplica en cualquier ancho de pantalla, no solo en móvil. */
-    .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
-        overflow-x: visible;
+    /* Compacta: NO comprimir el grid al ancho del celular (eso aplasta "Eb", intervalos, etc.). Scroll horizontal como la vista completa. */
+    .scale-grid-wrap.compact-mode {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    /* Vista compacta de la ESCALA: mismo criterio relajado que .rel-comp-compact (huecos legibles, texto horizontal). */
+    .harmony-wrap.compact-mode {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
     .scale-grid-wrap.compact-mode .scale-grid {
-        min-width: 0;
+        min-width: 720px;
         gap: 10px 8px;
         align-items: stretch;
         grid-template-columns:
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
-            minmax(0, 1fr);
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr) minmax(3.35rem, 0.52fr)
+            minmax(3.35rem, 1fr);
     }
     .harmony-wrap.compact-mode .harmony-degrees-row,
     .harmony-wrap.compact-mode .harmony-chords-row {
-        min-width: 0;
-        gap: 4px 6px;
+        min-width: 640px;
+        gap: 8px 8px;
     }
     .harmony-wrap.compact-mode .harmony-degree,
     .harmony-wrap.compact-mode .harmony-chord {
@@ -164,11 +173,11 @@ def inject_custom_css() -> None:
     .scale-grid-wrap.compact-mode .scale-note {
         white-space: nowrap;
         word-break: normal;
-        line-height: 1.15;
-        min-height: 42px;
-        font-size: 0.82rem;
-        padding: 7px 6px;
-        min-width: 2.9rem;
+        line-height: 1.2;
+        min-height: 44px;
+        font-size: 0.88rem;
+        padding: 8px 6px;
+        min-width: 3.1rem;
         box-sizing: border-box;
     }
     .scale-grid-wrap.compact-mode .scale-degree {
@@ -177,17 +186,19 @@ def inject_custom_css() -> None:
         padding-bottom: 2px;
     }
     .harmony-wrap.compact-mode .harmony-degree {
-        font-size: 0.66rem;
+        font-size: 0.78rem;
     }
     .harmony-wrap.compact-mode .harmony-chord {
-        min-height: 30px;
-        font-size: 0.64rem;
-        padding: 3px 2px;
+        min-height: 38px;
+        font-size: 0.76rem;
+        padding: 6px 5px;
+        line-height: 1.15;
     }
 
     @media (max-width: 768px) {
-        .block-container { padding-top: 1.35rem !important; }
-        .main .block-container { padding-top: 1.35rem !important; }
+        .block-container { padding-top: 2.35rem !important; }
+        .main .block-container { padding-top: 2.35rem !important; }
+        [data-testid="block-container"] { padding-top: 2.35rem !important; }
         .scale-grid { min-width: 760px; gap: 5px; }
         .scale-note { min-height: 38px; font-size: 0.85rem; padding: 6px 3px; }
         .scale-degree { font-size: 0.8rem; }
@@ -238,13 +249,14 @@ def inject_custom_css() -> None:
     /* Las 7 columnas de datos sin ancho explícito reparten el mismo trozo en layout fijo. */
     .rel-comp-col-data { width: auto; }
     .rel-comp-table th, .rel-comp-table td {
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--border-color, #cbd5e1);
         padding: 8px 6px;
         text-align: center;
         vertical-align: middle;
     }
     .rel-comp-corner {
-        background: #f1f5f9;
+        background: var(--secondary-background-color, #f1f5f9);
+        color: var(--text-color, #0f172a);
         font-weight: 700;
         font-size: 0.72rem;
         line-height: 1.15;
@@ -257,7 +269,8 @@ def inject_custom_css() -> None:
         letter-spacing: 0.04em;
     }
     .rel-comp-left {
-        background: #f8fafc;
+        background: var(--secondary-background-color, #f8fafc);
+        color: var(--text-color, #0f172a);
         font-weight: 600;
         text-align: left !important;
         font-size: 0.82rem;
@@ -265,20 +278,21 @@ def inject_custom_css() -> None:
     }
     .rel-comp-cell {
         font-weight: 600;
-        background: #ffffff;
+        background: var(--background-color, #ffffff);
+        color: var(--text-color, #0f172a);
     }
     .rel-comp-spacer-row th.rel-comp-left,
     .rel-comp-table td.rel-comp-spacer {
-        background: #f8fafc !important;
+        background: var(--secondary-background-color, #f8fafc) !important;
     }
     .rel-comp-spacer-row td.rel-comp-spacer {
-        border-color: #e2e8f0;
+        border-color: var(--border-color, #e2e8f0);
     }
     .rel-comp-strong {
-        color: #0f172a;
+        color: var(--text-color, #0f172a);
     }
     .rel-comp-deg {
-        color: #64748b;
+        color: var(--text-color, #64748b);
         font-weight: 700;
     }
     .rel-comp-q {
@@ -315,59 +329,8 @@ def inject_custom_css() -> None:
         padding: 5px 3px;
     }
 
+    /* Tema oscuro del SO: refuerzo si Streamlit sigue en claro (poco habitual). Tablas usan variables de tema arriba. */
     @media (prefers-color-scheme: dark) {
-        .scale-note {
-            background: rgba(30, 41, 59, 0.92);
-            border-color: #475569;
-            color: #f1f5f9;
-        }
-        .scale-step {
-            background: rgba(51, 65, 85, 0.75);
-            border-color: #64748b;
-            color: #e2e8f0;
-        }
-        .scale-degree {
-            color: #94a3b8;
-        }
-        .scale-structure-caption {
-            color: #cbd5e1;
-        }
-        .harmony-chord {
-            background: rgba(30, 41, 59, 0.92);
-            border-color: #475569;
-            color: #f1f5f9;
-        }
-        .harmony-degree {
-            color: #94a3b8;
-        }
-        .rel-comp-table th, .rel-comp-table td {
-            border-color: #475569;
-        }
-        .rel-comp-corner {
-            background: #1e293b;
-            color: #e2e8f0;
-        }
-        .rel-comp-left {
-            background: #334155;
-            color: #f8fafc;
-        }
-        .rel-comp-cell {
-            background: #0f172a;
-            color: #f1f5f9;
-        }
-        .rel-comp-spacer-row th.rel-comp-left,
-        .rel-comp-table td.rel-comp-spacer {
-            background: #334155 !important;
-        }
-        .rel-comp-spacer-row td.rel-comp-spacer {
-            border-color: #475569;
-        }
-        .rel-comp-strong {
-            color: #f8fafc;
-        }
-        .rel-comp-deg {
-            color: #94a3b8;
-        }
         .stTextInput input:disabled {
             -webkit-text-fill-color: #e2e8f0 !important;
             background-color: #1e293b !important;

@@ -104,6 +104,11 @@ def build_harmonized_chords(root_note: str, steps: list[int], harmony_tokens: li
     return notes, chords
 
 
+def _chord_label_compact(chord: str) -> str:
+    """Quita el paréntesis enarmónico en compacta para que quepa en columnas estrechas."""
+    return re.sub(r"\s*\([^)]*\)", "", chord).strip()
+
+
 def render_harmonization_result(
     root_note: str,
     scale_type: str,
@@ -128,7 +133,8 @@ def render_harmonization_result(
     items.append("</div>")
     items.append('<div class="harmony-chords-row">')
     for i, _ in enumerate(ROMAN_DEGREES[:-1]):
-        items.append(f'<div class="harmony-chord">{chords[i]}</div>')
+        label = _chord_label_compact(chords[i]) if compact else chords[i]
+        items.append(f'<div class="harmony-chord">{label}</div>')
     items.append("</div></div>")
     st.markdown("".join(items), unsafe_allow_html=True)
 
