@@ -58,7 +58,14 @@ def _query_param_modo_slug() -> str | None:
 
 
 def apply_mode_from_url() -> None:
-    """Restaura el modo desde ?modo=... al cargar o refrescar la página."""
+    """Solo en la primera ejecución de la sesión: hidratar modo desde ?modo=...
+
+    Si se aplicara en cada rerun, la URL vieja pisaría el modo que acaba de elegir
+    el usuario en el radio (rebote al modo anterior).
+    """
+    if st.session_state.get("_chordia_mode_from_url_done"):
+        return
+    st.session_state._chordia_mode_from_url_done = True
     slug = _query_param_modo_slug()
     if not slug:
         return

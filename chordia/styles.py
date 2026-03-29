@@ -329,8 +329,56 @@ def inject_custom_css() -> None:
         padding: 5px 3px;
     }
 
-    /* Tema oscuro del SO: refuerzo si Streamlit sigue en claro (poco habitual). Tablas usan variables de tema arriba. */
+    /*
+     * Tablas relativas en tema oscuro Streamlit: fondo negro/gris y texto claro
+     * (las variables CSS a veces no llegan al HTML inyectado; las celdas .rel-comp-q-* tenían fondo claro fijo).
+     */
+    [data-theme="dark"] .rel-comp-table th,
+    [data-theme="dark"] .rel-comp-table td {
+        border-color: #475569 !important;
+    }
+    [data-theme="dark"] .rel-comp-corner {
+        background: #0c0c0c !important;
+        color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] .rel-comp-left {
+        background: #141414 !important;
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .rel-comp-cell {
+        background: #0a0a0a !important;
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .rel-comp-spacer-row th.rel-comp-left,
+    [data-theme="dark"] .rel-comp-table td.rel-comp-spacer {
+        background: #141414 !important;
+    }
+    [data-theme="dark"] .rel-comp-strong {
+        color: #f8fafc !important;
+    }
+    [data-theme="dark"] .rel-comp-deg {
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] .rel-comp-q-mayor { background: #14532d !important; color: #bbf7d0 !important; }
+    [data-theme="dark"] .rel-comp-q-menor { background: #713f12 !important; color: #fef9c3 !important; }
+    [data-theme="dark"] .rel-comp-q-dism { background: #9a3412 !important; color: #ffedd5 !important; }
+    [data-theme="dark"] .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
+    [data-theme="dark"] .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
+
+    /* Mismo aspecto si el SO está en oscuro (refuerzo si falta data-theme en el árbol del markdown). */
     @media (prefers-color-scheme: dark) {
+        .rel-comp-table th, .rel-comp-table td { border-color: #475569 !important; }
+        .rel-comp-corner { background: #0c0c0c !important; color: #e2e8f0 !important; }
+        .rel-comp-left { background: #141414 !important; color: #f1f5f9 !important; }
+        .rel-comp-cell { background: #0a0a0a !important; color: #f1f5f9 !important; }
+        .rel-comp-spacer-row th.rel-comp-left, .rel-comp-table td.rel-comp-spacer { background: #141414 !important; }
+        .rel-comp-strong { color: #f8fafc !important; }
+        .rel-comp-deg { color: #94a3b8 !important; }
+        .rel-comp-q-mayor { background: #14532d !important; color: #bbf7d0 !important; }
+        .rel-comp-q-menor { background: #713f12 !important; color: #fef9c3 !important; }
+        .rel-comp-q-dism { background: #9a3412 !important; color: #ffedd5 !important; }
+        .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
+        .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
         .stTextInput input:disabled {
             -webkit-text-fill-color: #e2e8f0 !important;
             background-color: #1e293b !important;
