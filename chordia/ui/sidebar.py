@@ -154,20 +154,27 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool 
     if scales_df is None:
         st.warning("No se encontró la hoja de escalas en Google Sheets.")
         st.session_state.scales_selected_types = []
+        st.session_state.pop("_scales_sidebar_seeded", None)
         return
 
     type_col, _ = detect_scale_columns(scales_df)
     if not type_col:
         st.warning("No se encontró la columna de tipo de escala en la hoja.")
         st.session_state.scales_selected_types = []
+        st.session_state.pop("_scales_sidebar_seeded", None)
         return
 
     scale_types = [str(x).strip() for x in scales_df[type_col].dropna().tolist() if str(x).strip()]
     scale_types = list(dict.fromkeys(scale_types))
 
-    # Igual que en Diccionario: al entrar al modo o al cambiar raíz, seleccionar todo.
-    if reset_selection or root_changed or not st.session_state.scales_selected_types:
+    # No usar "not scales_selected_types": [] debe poder quedarse vacío (Limpiar o multiselect).
+    # Solo rellenar al cambiar de modo/raíz o en la primera carga de este sidebar.
+    if reset_selection or root_changed:
         st.session_state.scales_selected_types = scale_types.copy()
+        st.session_state._scales_sidebar_seeded = True
+    elif not st.session_state.get("_scales_sidebar_seeded"):
+        st.session_state.scales_selected_types = scale_types.copy()
+        st.session_state._scales_sidebar_seeded = True
 
     st.multiselect("Tipo:", scale_types, key="scales_selected_types")
     c1, c2 = st.columns(2)
@@ -211,18 +218,24 @@ def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selectio
     if harmony_df is None:
         st.warning("No se encontró la hoja de armonización de escalas en Google Sheets.")
         st.session_state.arm_selected_types = []
+        st.session_state.pop("_arm_sidebar_seeded", None)
         return
 
     type_col, _, _, _ = detect_harmonization_columns(harmony_df)
     if not type_col:
         st.warning("No se encontró la columna de tipo en la hoja.")
         st.session_state.arm_selected_types = []
+        st.session_state.pop("_arm_sidebar_seeded", None)
         return
 
     options = [str(x).strip() for x in harmony_df[type_col].dropna().tolist() if str(x).strip()]
     options = list(dict.fromkeys(options))
-    if reset_selection or root_changed or not st.session_state.arm_selected_types:
+    if reset_selection or root_changed:
         st.session_state.arm_selected_types = options.copy()
+        st.session_state._arm_sidebar_seeded = True
+    elif not st.session_state.get("_arm_sidebar_seeded"):
+        st.session_state.arm_selected_types = options.copy()
+        st.session_state._arm_sidebar_seeded = True
 
     st.multiselect("Tipo:", options, key="arm_selected_types")
     c1, c2 = st.columns(2)
@@ -405,6 +418,8 @@ def render_sidebar(
             del st.session_state.u_raiz
         st.session_state.pdf_data = None
         st.session_state.descargado = False
+        st.session_state.pop("_scales_sidebar_seeded", None)
+        st.session_state.pop("_arm_sidebar_seeded", None)
 
     st.write("---")
 
