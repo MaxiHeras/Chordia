@@ -302,9 +302,9 @@ def _render_pdf_controls(
         st.write("")
     placeholder = st.empty()
     if st.session_state.descargado:
-        placeholder.success("✅ ¡Listo, guardado!")
+        placeholder.success("✅ Listo, guardado")
     elif st.session_state.pdf_data:
-        placeholder.info("✅ ¡Listo para guardar!")
+        placeholder.success("✅ PDF generado")
 
     if st.button(generate_label, use_container_width=True, key="sidebar_generate_pdf"):
         placeholder.markdown("⏳ *Preparando PDF...*")
@@ -313,6 +313,7 @@ def _render_pdf_controls(
             st.session_state.pdf_data = pdf_bytes
             st.session_state.pdf_filename = filename
             st.session_state.descargado = False
+            placeholder.success("✅ PDF generado")
         else:
             placeholder.warning("No hay contenido disponible para generar PDF.")
 
