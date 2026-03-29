@@ -14,7 +14,11 @@ def inject_custom_css() -> None:
     [data-testid="block-container"] { padding-top: 2.75rem !important; }
     .main h1, .main h2, .main h3 { padding-top: 0.35rem !important; margin-top: 0.5rem !important; }
     div[data-testid="stRadio"] > div { gap: 20px; margin-top: 10px; }
-    @media (prefers-color-scheme: dark) { .chord-img-web { filter: invert(1) hue-rotate(180deg); } }
+    /* Diagramas PNG: invertir en tema oscuro Streamlit (PC) y en SO oscuro (móvil). */
+    [data-theme="dark"] .chord-img-web { filter: invert(1) hue-rotate(180deg); }
+    @media (prefers-color-scheme: dark) {
+        .chord-img-web { filter: invert(1) hue-rotate(180deg); }
+    }
     .scroll-container { display: flex !important; overflow-x: auto !important; gap: 15px !important; padding: 10px 0 !important; flex-wrap: nowrap !important; }
     .chord-diag-item { flex: 0 0 auto !important; width: 150px !important; text-align: center; }
     .chord-img-web { width: 100% !important; height: auto !important; }
@@ -270,9 +274,14 @@ def inject_custom_css() -> None:
     }
 
     @media (max-width: 768px) {
-        .block-container { padding-top: 2.35rem !important; }
-        .main .block-container { padding-top: 2.35rem !important; }
-        [data-testid="block-container"] { padding-top: 2.35rem !important; }
+        /* Títulos lo más arriba posible sin solaparse con la toolbar; notch vía safe-area */
+        .block-container { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
+        .main .block-container { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
+        [data-testid="block-container"] { padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)) !important; }
+        .main h1, .main h2, .main h3 {
+            padding-top: 0.1rem !important;
+            margin-top: 0.2rem !important;
+        }
         .scale-grid { min-width: 760px; gap: 5px; }
         .scale-note { min-height: 38px; font-size: 0.85rem; padding: 6px 3px; }
         .scale-degree { font-size: 0.8rem; }
@@ -424,6 +433,25 @@ def inject_custom_css() -> None:
     [data-theme="dark"] .harmony-chord {
         border-color: rgba(255, 255, 255, 0.62) !important;
     }
+    /* T / ST / 1½T: blanco en oscuro (las vars a veces no aplican al markdown → quedaba gris #6b7280). */
+    [data-theme="dark"] .scale-step {
+        color: #ffffff !important;
+    }
+    [data-theme="dark"] .scale-degree {
+        color: rgba(255, 255, 255, 0.92) !important;
+    }
+    [data-theme="dark"] .scale-note {
+        color: #f8fafc !important;
+    }
+    [data-theme="dark"] .scale-structure-caption {
+        color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] .harmony-degree {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    [data-theme="dark"] .harmony-chord {
+        color: #f8fafc !important;
+    }
 
     /* Mismo aspecto si el SO está en oscuro (refuerzo si falta data-theme en el árbol del markdown). */
     @media (prefers-color-scheme: dark) {
@@ -439,6 +467,15 @@ def inject_custom_css() -> None:
         .rel-comp-q-dism { background: #9a3412 !important; color: #ffedd5 !important; }
         .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
         .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
+        .scale-note, .scale-step, .harmony-chord {
+            border-color: rgba(255, 255, 255, 0.62) !important;
+        }
+        .scale-step { color: #ffffff !important; }
+        .scale-degree { color: rgba(255, 255, 255, 0.92) !important; }
+        .scale-note { color: #f8fafc !important; }
+        .scale-structure-caption { color: #e2e8f0 !important; }
+        .harmony-degree { color: rgba(255, 255, 255, 0.9) !important; }
+        .harmony-chord { color: #f8fafc !important; }
         .stTextInput input:disabled {
             -webkit-text-fill-color: #e2e8f0 !important;
             background-color: #1e293b !important;
