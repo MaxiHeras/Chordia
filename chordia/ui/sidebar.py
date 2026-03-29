@@ -46,29 +46,20 @@ def _app_public_url() -> str:
         return DEFAULT_APP_PUBLIC_URL
 
 
-def render_dictionary_sidebar(df: pd.DataFrame) -> tuple[str, pd.DataFrame]:
-    st.write("Filtrar Alteración:")
-    f_cols = st.columns(3)
-    nat = f_cols[0].checkbox("Nat.", value=(st.session_state.filtro_alteracion == "Nat."))
-    sost = f_cols[1].checkbox("Sost.", value=(st.session_state.filtro_alteracion == "Sost."))
-    bem = f_cols[2].checkbox("Bem.", value=(st.session_state.filtro_alteracion == "Bem."))
+def _on_dictionary_filtro_alteracion_change() -> None:
+    if "u_raiz" in st.session_state:
+        del st.session_state.u_raiz
 
-    if nat and st.session_state.filtro_alteracion != "Nat.":
-        st.session_state.filtro_alteracion = "Nat."
-        if "u_raiz" in st.session_state:
-            del st.session_state.u_raiz
-    elif sost and st.session_state.filtro_alteracion != "Sost.":
-        st.session_state.filtro_alteracion = "Sost."
-        if "u_raiz" in st.session_state:
-            del st.session_state.u_raiz
-    elif bem and st.session_state.filtro_alteracion != "Bem.":
-        st.session_state.filtro_alteracion = "Bem."
-        if "u_raiz" in st.session_state:
-            del st.session_state.u_raiz
-    elif not nat and not sost and not bem:
-        st.session_state.filtro_alteracion = "Nat."
-        if "u_raiz" in st.session_state:
-            del st.session_state.u_raiz
+
+def render_dictionary_sidebar(df: pd.DataFrame) -> tuple[str, pd.DataFrame]:
+    st.radio(
+        "Filtrar Alteración:",
+        ["Nat.", "Sost.", "Bem."],
+        horizontal=True,
+        key="filtro_alteracion",
+        help="Solo una convención a la vez.",
+        on_change=_on_dictionary_filtro_alteracion_change,
+    )
 
     notas_filtradas = filter_roots_by_alteration(NOTAS_MUSICALES, st.session_state.filtro_alteracion)
     raiz_opciones = [n for n in notas_filtradas if n in df["Raiz"].unique()]
