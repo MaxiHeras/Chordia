@@ -28,7 +28,15 @@ from chordia.relative_comparison import (
     sync_minor_from_major_for_options,
 )
 from chordia.scales import detect_scale_columns, roots_for_alteration
-from chordia.session import clear_selection_and_pdf, select_all_types, toggle_identifier_note
+from chordia.session import (
+    clear_arm_selection_and_pdf,
+    clear_scales_selection_and_pdf,
+    clear_selection_and_pdf,
+    select_all_arm_types,
+    select_all_scales_types,
+    select_all_types,
+    toggle_identifier_note,
+)
 
 
 def _app_public_url() -> str:
@@ -77,8 +85,19 @@ def render_dictionary_sidebar(df: pd.DataFrame) -> tuple[str, pd.DataFrame]:
 
     st.multiselect("Tipo:", opciones, key="seleccionados")
     c1, c2 = st.columns(2)
-    c1.button("Todo", on_click=select_all_types, args=(opciones,), use_container_width=True)
-    c2.button("Limpiar", on_click=clear_selection_and_pdf, use_container_width=True)
+    c1.button(
+        "Todo",
+        on_click=select_all_types,
+        args=(opciones,),
+        use_container_width=True,
+        key="dict_select_all_types",
+    )
+    c2.button(
+        "Limpiar",
+        on_click=clear_selection_and_pdf,
+        use_container_width=True,
+        key="dict_clear_selection",
+    )
     return raiz_sel, df_raiz
 
 
@@ -154,13 +173,14 @@ def render_scales_sidebar(scales_df: pd.DataFrame | None, reset_selection: bool 
     c1, c2 = st.columns(2)
     c1.button(
         "Todo",
-        on_click=lambda: st.session_state.update({"scales_selected_types": scale_types}),
+        on_click=select_all_scales_types,
+        args=(scale_types,),
         use_container_width=True,
         key="scales_select_all",
     )
     c2.button(
         "Limpiar",
-        on_click=lambda: st.session_state.update({"scales_selected_types": []}),
+        on_click=clear_scales_selection_and_pdf,
         use_container_width=True,
         key="scales_clear_all",
     )
@@ -206,8 +226,19 @@ def render_harmonization_sidebar(harmony_df: pd.DataFrame | None, reset_selectio
 
     st.multiselect("Tipo:", options, key="arm_selected_types")
     c1, c2 = st.columns(2)
-    c1.button("Todo", on_click=lambda: st.session_state.update({"arm_selected_types": options}), use_container_width=True, key="arm_select_all")
-    c2.button("Limpiar", on_click=lambda: st.session_state.update({"arm_selected_types": []}), use_container_width=True, key="arm_clear_all")
+    c1.button(
+        "Todo",
+        on_click=select_all_arm_types,
+        args=(options,),
+        use_container_width=True,
+        key="arm_select_all",
+    )
+    c2.button(
+        "Limpiar",
+        on_click=clear_arm_selection_and_pdf,
+        use_container_width=True,
+        key="arm_clear_all",
+    )
 
 
 def render_relative_comparison_sidebar(rel_keys: RelativeKeyPairs | None = None) -> None:

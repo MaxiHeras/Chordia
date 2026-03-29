@@ -86,11 +86,34 @@ def sync_mode_to_url() -> None:
 
 
 def select_all_types(opciones: list[str]) -> None:
-    st.session_state.seleccionados = opciones
+    st.session_state.seleccionados = list(opciones)
 
 
 def clear_selection_and_pdf() -> None:
     st.session_state.seleccionados = []
+    st.session_state.pdf_data = None
+    st.session_state.pdf_filename = "Chordia.pdf"
+    st.session_state.descargado = False
+
+
+def select_all_scales_types(opciones: list[str]) -> None:
+    """Callback con nombre (evita lambdas en on_click que fallan al cambiar de modo en Streamlit)."""
+    st.session_state.scales_selected_types = list(opciones)
+
+
+def clear_scales_selection_and_pdf() -> None:
+    st.session_state.scales_selected_types = []
+    st.session_state.pdf_data = None
+    st.session_state.pdf_filename = "Chordia.pdf"
+    st.session_state.descargado = False
+
+
+def select_all_arm_types(opciones: list[str]) -> None:
+    st.session_state.arm_selected_types = list(opciones)
+
+
+def clear_arm_selection_and_pdf() -> None:
+    st.session_state.arm_selected_types = []
     st.session_state.pdf_data = None
     st.session_state.pdf_filename = "Chordia.pdf"
     st.session_state.descargado = False
