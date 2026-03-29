@@ -21,5 +21,17 @@ MODE_SCALES = "Escalas 🎼"
 MODE_SCALE_HARMONIZATION = "Armonización de escalas 🎶"
 MODE_RELATIVE_COMPARISON = "Relativas y comparación ⚖️"
 
+# Slugs para ?modo= en la URL (persistencia al refrescar / compartir enlace).
+MODE_TO_URL_SLUG: dict[str, str] = {
+    MODE_IDENTIFIER: "identificador",
+    MODE_DICTIONARY: "diccionario",
+    MODE_SCALES: "escalas",
+    MODE_SCALE_HARMONIZATION: "armonizacion",
+    MODE_RELATIVE_COMPARISON: "relativas",
+}
+URL_SLUG_TO_MODE: dict[str, str] = {
+    slug: mode for mode, slug in MODE_TO_URL_SLUG.items()
+}
+
 NOTE_COLS = ("N1", "N2", "N3", "N4")
 DIAGRAM_COUNT = 9

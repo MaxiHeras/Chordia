@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from chordia.constants import MODE_DICTIONARY
+from chordia.constants import MODE_DICTIONARY, MODE_TO_URL_SLUG, URL_SLUG_TO_MODE
 
 
 def ensure_session_defaults() -> None:
@@ -46,6 +46,36 @@ def ensure_session_defaults() -> None:
         st.session_state.rel_comp_sidebar_mode = "Mayor"
     if "mobile_content_view_mode" not in st.session_state:
         st.session_state.mobile_content_view_mode = "completa"
+
+
+def _query_param_modo_slug() -> str | None:
+    raw = st.query_params.get("modo")
+    if raw is None:
+        return None
+    if isinstance(raw, list):
+        return str(raw[0]).strip().lower() if raw else None
+    return str(raw).strip().lower()
+
+
+def apply_mode_from_url() -> None:
+    """Restaura el modo desde ?modo=... al cargar o refrescar la página."""
+    slug = _query_param_modo_slug()
+    if not slug:
+        return
+    mode = URL_SLUG_TO_MODE.get(slug)
+    if mode:
+        st.session_state.modo_actual = mode
+
+
+def sync_mode_to_url() -> None:
+    """Mantiene la URL alineada con el modo actual para que el refresh conserve la pantalla."""
+    modo = st.session_state.get("modo_actual")
+    slug = MODE_TO_URL_SLUG.get(modo) if modo else None
+    if not slug:
+        return
+    current = _query_param_modo_slug()
+    if current != slug:
+        st.query_params["modo"] = slug
 
 
 def select_all_types(opciones: list[str]) -> None:

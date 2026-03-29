@@ -8,7 +8,9 @@ def inject_custom_css() -> None:
         """
     <style>
     [data-testid="stSidebarUserContent"] { padding-top: 0.5rem !important; }
-    .block-container { padding-top: 1rem !important; padding-bottom: 0rem !important; }
+    /* Más aire bajo la barra de Streamlit para que los títulos no queden “cortados” en móvil. */
+    .block-container { padding-top: 2rem !important; padding-bottom: 0rem !important; }
+    .main .block-container { padding-top: 2rem !important; }
     div[data-testid="stRadio"] > div { gap: 20px; margin-top: 10px; }
     @media (prefers-color-scheme: dark) { .chord-img-web { filter: invert(1) hue-rotate(180deg); } }
     .scroll-container { display: flex !important; overflow-x: auto !important; gap: 15px !important; padding: 10px 0 !important; flex-wrap: nowrap !important; }
@@ -124,17 +126,19 @@ def inject_custom_css() -> None:
     .scale-grid-wrap.compact-mode, .harmony-wrap.compact-mode {
         overflow-x: visible;
     }
+    /* Vista compacta de la ESCALA: mismo criterio relajado que .rel-comp-compact (huecos legibles, texto horizontal). */
     .scale-grid-wrap.compact-mode .scale-grid {
         min-width: 0;
-        gap: 4px;
+        gap: 10px 8px;
+        align-items: stretch;
         grid-template-columns:
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
-            minmax(0, 1fr) minmax(2.9rem, 0.52fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
+            minmax(0, 1fr) minmax(3.45rem, 0.58fr)
             minmax(0, 1fr);
     }
     .harmony-wrap.compact-mode .harmony-degrees-row,
@@ -142,8 +146,6 @@ def inject_custom_css() -> None:
         min-width: 0;
         gap: 4px 6px;
     }
-    .scale-grid-wrap.compact-mode .scale-note,
-    .scale-grid-wrap.compact-mode .scale-degree,
     .harmony-wrap.compact-mode .harmony-degree,
     .harmony-wrap.compact-mode .harmony-chord {
         white-space: normal;
@@ -153,19 +155,26 @@ def inject_custom_css() -> None:
     .scale-grid-wrap.compact-mode .scale-step {
         white-space: nowrap;
         word-break: normal;
-        line-height: 1.15;
-        font-size: 0.72rem;
-        padding: 4px 5px;
-        min-width: 2.9rem;
+        line-height: 1.2;
+        font-size: 0.74rem;
+        padding: 6px 5px;
+        min-width: 3.35rem;
         box-sizing: border-box;
     }
     .scale-grid-wrap.compact-mode .scale-note {
-        min-height: 30px;
-        font-size: 0.66rem;
-        padding: 3px 2px;
+        white-space: nowrap;
+        word-break: normal;
+        line-height: 1.15;
+        min-height: 42px;
+        font-size: 0.82rem;
+        padding: 7px 6px;
+        min-width: 2.9rem;
+        box-sizing: border-box;
     }
     .scale-grid-wrap.compact-mode .scale-degree {
-        font-size: 0.64rem;
+        font-size: 0.78rem;
+        line-height: 1.25;
+        padding-bottom: 2px;
     }
     .harmony-wrap.compact-mode .harmony-degree {
         font-size: 0.66rem;
@@ -177,7 +186,8 @@ def inject_custom_css() -> None:
     }
 
     @media (max-width: 768px) {
-        .block-container { padding-top: 0.5rem !important; }
+        .block-container { padding-top: 1.35rem !important; }
+        .main .block-container { padding-top: 1.35rem !important; }
         .scale-grid { min-width: 760px; gap: 5px; }
         .scale-note { min-height: 38px; font-size: 0.85rem; padding: 6px 3px; }
         .scale-degree { font-size: 0.8rem; }
@@ -190,13 +200,17 @@ def inject_custom_css() -> None:
 
     @media (max-width: 430px) {
         .scale-grid-wrap.compact-mode .scale-note {
-            font-size: 0.6rem;
-            min-height: 27px;
+            font-size: 0.78rem;
+            min-height: 38px;
+            padding: 6px 5px;
         }
         .scale-grid-wrap.compact-mode .scale-step {
-            font-size: 0.64rem;
-            min-width: 2.75rem;
-            padding: 3px 4px;
+            font-size: 0.7rem;
+            min-width: 3.15rem;
+            padding: 5px 4px;
+        }
+        .scale-grid-wrap.compact-mode .scale-degree {
+            font-size: 0.74rem;
         }
         .harmony-wrap.compact-mode .harmony-chord {
             font-size: 0.6rem;
@@ -299,6 +313,67 @@ def inject_custom_css() -> None:
     .rel-comp-compact .rel-comp-table th,
     .rel-comp-compact .rel-comp-table td {
         padding: 5px 3px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .scale-note {
+            background: rgba(30, 41, 59, 0.92);
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+        .scale-step {
+            background: rgba(51, 65, 85, 0.75);
+            border-color: #64748b;
+            color: #e2e8f0;
+        }
+        .scale-degree {
+            color: #94a3b8;
+        }
+        .scale-structure-caption {
+            color: #cbd5e1;
+        }
+        .harmony-chord {
+            background: rgba(30, 41, 59, 0.92);
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+        .harmony-degree {
+            color: #94a3b8;
+        }
+        .rel-comp-table th, .rel-comp-table td {
+            border-color: #475569;
+        }
+        .rel-comp-corner {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .rel-comp-left {
+            background: #334155;
+            color: #f8fafc;
+        }
+        .rel-comp-cell {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        .rel-comp-spacer-row th.rel-comp-left,
+        .rel-comp-table td.rel-comp-spacer {
+            background: #334155 !important;
+        }
+        .rel-comp-spacer-row td.rel-comp-spacer {
+            border-color: #475569;
+        }
+        .rel-comp-strong {
+            color: #f8fafc;
+        }
+        .rel-comp-deg {
+            color: #94a3b8;
+        }
+        .stTextInput input:disabled {
+            -webkit-text-fill-color: #e2e8f0 !important;
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #e2e8f0 !important;
+        }
     }
     </style>
 """,
