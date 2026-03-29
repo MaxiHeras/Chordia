@@ -120,11 +120,23 @@ def render_harmonization_result(
 ) -> None:
     st.subheader(f"{root_note} {scale_type}")
     render_scale_grid(notes, steps, compact=compact)
+    cap_cls = (
+        "scale-structure-caption scale-structure-caption--compact"
+        if compact
+        else "scale-structure-caption"
+    )
     st.markdown(
-        f'<div class="scale-structure-caption">Estructura: {raw_structure}</div>',
+        f'<div class="{cap_cls}">Estructura: {raw_structure}</div>',
         unsafe_allow_html=True,
     )
-    st.markdown("**Acordes de la escala armonizada**")
+    if compact:
+        st.markdown(
+            '<p class="harmony-block-title harmony-block-title--compact">'
+            "<strong>Acordes de la escala armonizada</strong></p>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown("**Acordes de la escala armonizada**")
 
     wrap_class = "harmony-wrap compact-mode" if compact else "harmony-wrap"
     items = [f'<div class="{wrap_class}"><div class="harmony-degrees-row">']

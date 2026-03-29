@@ -120,13 +120,13 @@ def parse_scale_steps(raw_structure: str) -> list[int] | None:
     return values[:7]
 
 
-def step_to_label(step: int) -> str:
+def step_to_label(step: int, *, compact: bool = False) -> str:
     if step == 2:
         return "T"
     if step == 1:
         return "ST"
     if step == 3:
-        return "1.5T"
+        return "1½T" if compact else "1.5T"
     return str(step)
 
 
@@ -172,7 +172,7 @@ def render_scale_grid(notes: list[str], steps: list[int], compact: bool = False)
     # Fila 3: estructura entre notas (T/ST en cuadros).
     step_attr = ' style="white-space:nowrap"' if compact else ""
     for i, val in enumerate(steps):
-        html.append(f'<div class="scale-step c{2 * i + 2}"{step_attr}>{step_to_label(val)}</div>')
+        html.append(f'<div class="scale-step c{2 * i + 2}"{step_attr}>{step_to_label(val, compact=compact)}</div>')
 
     html.append("</div></div>")
     st.markdown("".join(html), unsafe_allow_html=True)

@@ -86,8 +86,13 @@ def render_main_scales(scales_df: pd.DataFrame | None) -> None:
             notes = build_scale(root, steps)
             st.subheader(f"{root} {scale_type}")
             render_scale_grid(notes, steps, compact=compact)
+            cap_cls = (
+                "scale-structure-caption scale-structure-caption--compact"
+                if compact
+                else "scale-structure-caption"
+            )
             st.markdown(
-                f'<div class="scale-structure-caption">Estructura: {raw_structure}</div>',
+                f'<div class="{cap_cls}">Estructura: {raw_structure}</div>',
                 unsafe_allow_html=True,
             )
 

@@ -83,6 +83,17 @@ def inject_custom_css() -> None:
         margin-top: 26px;
         color: var(--text-color, inherit);
     }
+    .scale-structure-caption--compact {
+        margin-top: 8px !important;
+        margin-bottom: 4px !important;
+        font-size: 0.74rem !important;
+        line-height: 1.3;
+    }
+    .harmony-block-title--compact {
+        margin: 0.4rem 0 0.15rem 0 !important;
+        font-size: 0.88rem !important;
+        line-height: 1.25;
+    }
     .harmony-degrees-row {
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -127,7 +138,7 @@ def inject_custom_css() -> None:
     .c6 { grid-column: 6; } .c7 { grid-column: 7; } .c8 { grid-column: 8; } .c9 { grid-column: 9; } .c10 { grid-column: 10; }
     .c11 { grid-column: 11; } .c12 { grid-column: 12; } .c13 { grid-column: 13; } .c14 { grid-column: 14; } .c15 { grid-column: 15; }
 
-    /* Compacta: NO comprimir el grid al ancho del celular (eso aplasta "Eb", intervalos, etc.). Scroll horizontal como la vista completa. */
+    /* Vista compacta en pantallas anchas: grilla ancha con scroll si hace falta. */
     .scale-grid-wrap.compact-mode {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -195,6 +206,69 @@ def inject_custom_css() -> None:
         line-height: 1.15;
     }
 
+    /*
+     * Celular + compacta: grilla al 100% del ancho, sin scroll horizontal, tipografía mínima.
+     * Las notas en compacta ya vienen cortas (sin enarmónico entre paréntesis).
+     */
+    @media (max-width: 520px) {
+        .scale-grid-wrap.compact-mode {
+            overflow-x: hidden !important;
+        }
+        .scale-grid-wrap.compact-mode .scale-grid {
+            min-width: 0 !important;
+            width: 100%;
+            max-width: 100%;
+            gap: 3px 2px !important;
+            margin-top: 4px !important;
+            margin-bottom: 2px !important;
+            align-items: stretch;
+            grid-template-columns: repeat(15, minmax(0, 1fr)) !important;
+        }
+        .scale-grid-wrap.compact-mode .scale-degree {
+            font-size: 0.56rem !important;
+            line-height: 1.05 !important;
+            padding-bottom: 0 !important;
+        }
+        .scale-grid-wrap.compact-mode .scale-note {
+            font-size: 0.62rem !important;
+            min-height: 22px !important;
+            padding: 3px 1px !important;
+            min-width: 0 !important;
+            border-radius: 5px;
+        }
+        .scale-grid-wrap.compact-mode .scale-step {
+            font-size: 0.54rem !important;
+            min-width: 0 !important;
+            padding: 2px 1px !important;
+            border-radius: 5px;
+            line-height: 1.1 !important;
+        }
+        .harmony-wrap.compact-mode {
+            overflow-x: hidden !important;
+        }
+        .harmony-wrap.compact-mode .harmony-degrees-row,
+        .harmony-wrap.compact-mode .harmony-chords-row {
+            min-width: 0 !important;
+            width: 100%;
+            max-width: 100%;
+            gap: 3px 2px !important;
+            margin-top: 4px !important;
+            margin-bottom: 2px !important;
+            grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        }
+        .harmony-wrap.compact-mode .harmony-degree {
+            font-size: 0.56rem !important;
+            line-height: 1.05 !important;
+        }
+        .harmony-wrap.compact-mode .harmony-chord {
+            font-size: 0.58rem !important;
+            min-height: 26px !important;
+            padding: 3px 2px !important;
+            line-height: 1.1 !important;
+            border-radius: 5px;
+        }
+    }
+
     @media (max-width: 768px) {
         .block-container { padding-top: 2.35rem !important; }
         .main .block-container { padding-top: 2.35rem !important; }
@@ -207,26 +281,6 @@ def inject_custom_css() -> None:
         .harmony-degrees-row, .harmony-chords-row { min-width: 620px; gap: 6px 8px; }
         .harmony-degree { font-size: 0.8rem; }
         .harmony-chord { min-height: 34px; font-size: 0.82rem; padding: 6px 3px; }
-    }
-
-    @media (max-width: 430px) {
-        .scale-grid-wrap.compact-mode .scale-note {
-            font-size: 0.78rem;
-            min-height: 38px;
-            padding: 6px 5px;
-        }
-        .scale-grid-wrap.compact-mode .scale-step {
-            font-size: 0.7rem;
-            min-width: 3.15rem;
-            padding: 5px 4px;
-        }
-        .scale-grid-wrap.compact-mode .scale-degree {
-            font-size: 0.74rem;
-        }
-        .harmony-wrap.compact-mode .harmony-chord {
-            font-size: 0.6rem;
-            min-height: 27px;
-        }
     }
 
     .rel-comp-wrap {
@@ -335,7 +389,7 @@ def inject_custom_css() -> None:
      */
     [data-theme="dark"] .rel-comp-table th,
     [data-theme="dark"] .rel-comp-table td {
-        border-color: #475569 !important;
+        border: 1px solid rgba(255, 255, 255, 0.72) !important;
     }
     [data-theme="dark"] .rel-comp-corner {
         background: #0c0c0c !important;
@@ -365,9 +419,15 @@ def inject_custom_css() -> None:
     [data-theme="dark"] .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
     [data-theme="dark"] .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
 
+    [data-theme="dark"] .scale-note,
+    [data-theme="dark"] .scale-step,
+    [data-theme="dark"] .harmony-chord {
+        border-color: rgba(255, 255, 255, 0.62) !important;
+    }
+
     /* Mismo aspecto si el SO está en oscuro (refuerzo si falta data-theme en el árbol del markdown). */
     @media (prefers-color-scheme: dark) {
-        .rel-comp-table th, .rel-comp-table td { border-color: #475569 !important; }
+        .rel-comp-table th, .rel-comp-table td { border: 1px solid rgba(255, 255, 255, 0.72) !important; }
         .rel-comp-corner { background: #0c0c0c !important; color: #e2e8f0 !important; }
         .rel-comp-left { background: #141414 !important; color: #f1f5f9 !important; }
         .rel-comp-cell { background: #0a0a0a !important; color: #f1f5f9 !important; }
