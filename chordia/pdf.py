@@ -270,6 +270,7 @@ def build_relative_comparison_pdf(
         *,
         colorize: bool = False,
         band_fill: bool = False,
+        bold_cells: bool = False,
     ) -> None:
         pdf.set_x(left)
         pdf.set_font("helvetica", "B", 8)
@@ -279,7 +280,7 @@ def build_relative_comparison_pdf(
         else:
             pdf.set_fill_color(255, 255, 255)
             pdf.cell(col_label, h_row, label, border=1)
-        pdf.set_font("helvetica", "", 8)
+        pdf.set_font("helvetica", "B" if bold_cells else "", 8)
         for c in cells:
             txt = c.replace("—", "-")
             if colorize:
@@ -304,7 +305,7 @@ def build_relative_comparison_pdf(
     if show_root_row:
         row_line("Raíz", data.major_degrees_notes)
         row_line("", [""] * 7, band_fill=True)
-    row_line("Grados", list(ROMAN_HEADER))
+    row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EM", data.major_harm_row, colorize=True)
     pdf.ln(gap_between_tables)
 
@@ -314,7 +315,7 @@ def build_relative_comparison_pdf(
     if show_root_row:
         row_line("Raíz", data.minor_degrees_notes)
         row_line("", [""] * 7, band_fill=True)
-    row_line("Grados", list(ROMAN_HEADER))
+    row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EmN", data.minor_emn, colorize=True)
     row_line("EmA", data.minor_ema_display, colorize=True)
     row_line("EmM", data.minor_emm_display, colorize=True)
