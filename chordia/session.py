@@ -45,7 +45,7 @@ def ensure_session_defaults() -> None:
     if "rel_comp_sidebar_mode" not in st.session_state:
         st.session_state.rel_comp_sidebar_mode = "Mayor"
     if "mobile_content_view_mode" not in st.session_state:
-        st.session_state.mobile_content_view_mode = "completa"
+        st.session_state.mobile_content_view_mode = "compacta"
 
 
 def _query_param_modo_slug() -> str | None:
