@@ -390,7 +390,7 @@ def inject_custom_css() -> None:
     .rel-comp-q-menor { background: #fef08a !important; color: #713f12; }
     .rel-comp-q-dism { background: #fdba74 !important; color: #0f172a; }
     .rel-comp-q-aum { background: #93c5fd !important; color: #0f172a; }
-    .rel-comp-q-same { background: #94a3b8 !important; color: #0f172a; }
+    .rel-comp-q-same { background: #a8b5c8 !important; color: #0f172a; }
     .rel-comp-compact .rel-comp-table {
         font-size: 0.78rem;
         min-width: 0;
@@ -451,7 +451,7 @@ def inject_custom_css() -> None:
     [data-theme="dark"] .rel-comp-q-menor { background: #713f12 !important; color: #fef9c3 !important; }
     [data-theme="dark"] .rel-comp-q-dism { background: #9a3412 !important; color: #ffedd5 !important; }
     [data-theme="dark"] .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
-    [data-theme="dark"] .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
+    [data-theme="dark"] .rel-comp-q-same { background: #64748b !important; color: #f1f5f9 !important; }
 
     [data-theme="dark"] .scale-note,
     [data-theme="dark"] .scale-step,
@@ -494,7 +494,7 @@ def inject_custom_css() -> None:
         .rel-comp-q-menor { background: #713f12 !important; color: #fef9c3 !important; }
         .rel-comp-q-dism { background: #9a3412 !important; color: #ffedd5 !important; }
         .rel-comp-q-aum { background: #1e3a8a !important; color: #dbeafe !important; }
-        .rel-comp-q-same { background: #475569 !important; color: #f1f5f9 !important; }
+        .rel-comp-q-same { background: #64748b !important; color: #f1f5f9 !important; }
         .scale-note, .scale-step, .harmony-chord {
             border-color: rgba(255, 255, 255, 0.62) !important;
         }

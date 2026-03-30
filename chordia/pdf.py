@@ -305,8 +305,7 @@ def build_relative_comparison_pdf(
         pdf.set_x(left)
         pdf.set_font("helvetica", "B", 8)
         pdf.set_fill_color(*_spacer_fill)
-        pdf.cell(col_label, height, "", border=1, fill=True)
-        pdf.cell(cell_w * 7, height, "", border=1, fill=True)
+        pdf.cell(col_label + (cell_w * 7), height, "", border=1, fill=True)
         pdf.ln(height)
 
     show_root_row = print_mode != "without_root"
