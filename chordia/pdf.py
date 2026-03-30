@@ -91,7 +91,8 @@ def _draw_chord_section(
     _ensure_space(pdf, needed_height, print_mode)
 
     pdf.set_font("helvetica", "B", 24)
-    pdf.cell(0, 20, f"{row['Raiz']} {row['Naturaleza']}", border=1, ln=True, align="C")
+    pdf.set_fill_color(242, 242, 242)
+    pdf.cell(0, 20, f"{row['Raiz']} {row['Naturaleza']}", border=1, ln=True, align="C", fill=True)
     pdf.ln(_GAP_AFTER_TITLE)
     pdf.set_x(_MARGIN_X)
     pdf.set_font("helvetica", "B", 11)
@@ -177,7 +178,8 @@ def build_scales_pdf(
         # Reserva para sección completa; si no entra en continuo, salta página.
         _ensure_space(pdf, 86, print_mode)
         pdf.set_font("helvetica", "B", 22)
-        pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C")
+        pdf.set_fill_color(242, 242, 242)
+        pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C", fill=True)
         pdf.ln(10)
 
         # Ajuste dinámico para que siempre entren 8 notas + 7 intervalos.
@@ -303,7 +305,7 @@ def build_relative_comparison_pdf(
     pdf.cell(0, title_h, "Tonalidad mayor", ln=True)
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
-        row_line("Raíz", data.major_degrees_notes)
+        row_line("Raíz", data.major_degrees_notes, bold_cells=True)
         row_line("", [""] * 7, band_fill=True)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EM", data.major_harm_row, colorize=True)
@@ -313,7 +315,7 @@ def build_relative_comparison_pdf(
     pdf.cell(0, title_h, "Tonalidad menor", ln=True)
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
-        row_line("Raíz", data.minor_degrees_notes)
+        row_line("Raíz", data.minor_degrees_notes, bold_cells=True)
         row_line("", [""] * 7, band_fill=True)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EmN", data.minor_emn, colorize=True)
@@ -332,7 +334,8 @@ def build_info_pdf(title: str, body_lines: list[str], app_public_url: str) -> by
     pdf.set_auto_page_break(auto=True, margin=35)
     pdf.add_page()
     pdf.set_font("helvetica", "B", 22)
-    pdf.cell(0, 16, title, border=1, ln=True, align="C")
+    pdf.set_fill_color(242, 242, 242)
+    pdf.cell(0, 16, title, border=1, ln=True, align="C", fill=True)
     pdf.ln(10)
     pdf.set_font("helvetica", "", 12)
     for line in body_lines:
@@ -379,7 +382,8 @@ def build_harmonization_pdf(
 
         _ensure_space(pdf, 118, print_mode)
         pdf.set_font("helvetica", "B", 22)
-        pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C")
+        pdf.set_fill_color(242, 242, 242)
+        pdf.cell(0, 16, f"{root_note} {scale_type}", border=1, ln=True, align="C", fill=True)
         pdf.ln(9)
 
         total_width = pdf.w - pdf.l_margin - pdf.r_margin
