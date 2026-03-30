@@ -488,7 +488,7 @@ def render_sidebar(
             print_mode_label="Modo de impresión PDF:",
             print_mode_key="rel_pdf_print_mode",
             print_mode_options=("current_view", "without_root"),
-            print_mode_format_func=lambda x: "Vista actual (por defecto)" if x == "current_view" else "Imprimir sin raíz",
+            print_mode_format_func=lambda x: "Vista actual (por defecto)" if x == "current_view" else "Sin nota raíz",
         )
         render_share_section()
         _render_mobile_view_mode_switch()

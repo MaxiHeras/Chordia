@@ -287,7 +287,7 @@ def build_relative_comparison_pdf(
 
     show_root_row = print_mode != "without_root"
     title_h = 7 if show_root_row else 6
-    gap_between_tables = 5 if show_root_row else 3
+    gap_between_tables = 7 if show_root_row else 5
 
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, title_h, "Tonalidad mayor", ln=True)
@@ -300,7 +300,7 @@ def build_relative_comparison_pdf(
     pdf.ln(gap_between_tables)
 
     pdf.set_font("helvetica", "B", 11)
-    pdf.cell(0, title_h, "Tonalidad menor (relativa)", ln=True)
+    pdf.cell(0, title_h, "Tonalidad menor", ln=True)
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
         row_line("Raíz", data.minor_degrees_notes)
