@@ -27,18 +27,27 @@ class ChordiaPDF(FPDF):
 
     def footer(self) -> None:
         self.set_y(-30)
+        qr_x = 174
+        qr_w = 20
         qr_url = (
             "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data="
             f"{urllib.parse.quote(self._app_public_url)}"
         )
         try:
-            self.image(qr_url, x=175, y=self.get_y(), w=20, h=20)
+            self.image(qr_url, x=qr_x, y=self.get_y(), w=qr_w, h=qr_w)
         except Exception:
             pass
         self.set_y(self.get_y() + 22)
-        self.set_font("helvetica", "", 10)
+        self.set_font("helvetica", "", 9)
         self.set_text_color(128, 128, 128)
-        self.cell(0, 5, "by Maxi Heras - Tucumán", align="R", ln=True)
+        caption = "by Maxi Heras - Tucumán"
+        text_w = self.get_string_width(caption) + 1.5
+        qr_center_x = qr_x + (qr_w / 2)
+        min_x = self.l_margin
+        max_x = self.w - self.r_margin - text_w
+        text_x = min(max(qr_center_x - (text_w / 2), min_x), max_x)
+        self.set_x(text_x)
+        self.cell(text_w, 5, caption, align="C", ln=True)
 
 
 def _ensure_space(pdf: ChordiaPDF, needed_height: float, print_mode: str) -> None:
