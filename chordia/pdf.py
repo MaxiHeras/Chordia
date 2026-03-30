@@ -262,10 +262,10 @@ def build_relative_comparison_pdf(
     col_label = 20.0
     cell_w = (total_w - col_label) / 7.0
     h_row = 6.0
-    h_spacer = 4.2
+    h_spacer = 3.6
     left = pdf.l_margin
 
-    _spacer_fill = (248, 250, 252)
+    _spacer_fill = (242, 242, 242)
 
     def row_line(
         label: str,
@@ -300,6 +300,15 @@ def build_relative_comparison_pdf(
                 pdf.cell(cell_w, height, txt, border=1, align="C", fill=False)
         pdf.ln(height)
 
+    def spacer_row(height: float) -> None:
+        """Franja sólida entre Raíz y Grados (sin separaciones internas)."""
+        pdf.set_x(left)
+        pdf.set_font("helvetica", "B", 8)
+        pdf.set_fill_color(*_spacer_fill)
+        pdf.cell(col_label, height, "", border=1, fill=True)
+        pdf.cell(cell_w * 7, height, "", border=1, fill=True)
+        pdf.ln(height)
+
     show_root_row = print_mode != "without_root"
     title_h = 7 if show_root_row else 6
     gap_between_tables = 7 if show_root_row else 5
@@ -309,7 +318,7 @@ def build_relative_comparison_pdf(
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
         row_line("Raíz", data.major_degrees_notes, bold_cells=True)
-        row_line("", [""] * 7, band_fill=True, row_h=h_spacer)
+        spacer_row(h_spacer)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EM", data.major_harm_row, colorize=True)
     pdf.ln(gap_between_tables)
@@ -319,7 +328,7 @@ def build_relative_comparison_pdf(
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
         row_line("Raíz", data.minor_degrees_notes, bold_cells=True)
-        row_line("", [""] * 7, band_fill=True, row_h=h_spacer)
+        spacer_row(h_spacer)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EmN", data.minor_emn, colorize=True)
     row_line("EmA", data.minor_ema_display, colorize=True)
