@@ -262,6 +262,7 @@ def build_relative_comparison_pdf(
     col_label = 20.0
     cell_w = (total_w - col_label) / 7.0
     h_row = 6.0
+    h_spacer = 4.2
     left = pdf.l_margin
 
     _spacer_fill = (248, 250, 252)
@@ -273,29 +274,31 @@ def build_relative_comparison_pdf(
         colorize: bool = False,
         band_fill: bool = False,
         bold_cells: bool = False,
+        row_h: float | None = None,
     ) -> None:
+        height = row_h if row_h is not None else h_row
         pdf.set_x(left)
         pdf.set_font("helvetica", "B", 8)
         if band_fill and not colorize:
             pdf.set_fill_color(*_spacer_fill)
-            pdf.cell(col_label, h_row, label, border=1, fill=True)
+            pdf.cell(col_label, height, label, border=1, fill=True)
         else:
             pdf.set_fill_color(255, 255, 255)
-            pdf.cell(col_label, h_row, label, border=1)
+            pdf.cell(col_label, height, label, border=1)
         pdf.set_font("helvetica", "B" if bold_cells else "", 8)
         for c in cells:
             txt = c.replace("—", "-")
             if colorize:
                 r, g, b = quality_fill_rgb(c)
                 pdf.set_fill_color(r, g, b)
-                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=True)
+                pdf.cell(cell_w, height, txt, border=1, align="C", fill=True)
             elif band_fill:
                 pdf.set_fill_color(*_spacer_fill)
-                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=True)
+                pdf.cell(cell_w, height, txt, border=1, align="C", fill=True)
             else:
                 pdf.set_fill_color(255, 255, 255)
-                pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=False)
-        pdf.ln(h_row)
+                pdf.cell(cell_w, height, txt, border=1, align="C", fill=False)
+        pdf.ln(height)
 
     show_root_row = print_mode != "without_root"
     title_h = 7 if show_root_row else 6
@@ -306,7 +309,7 @@ def build_relative_comparison_pdf(
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
         row_line("Raíz", data.major_degrees_notes, bold_cells=True)
-        row_line("", [""] * 7, band_fill=True)
+        row_line("", [""] * 7, band_fill=True, row_h=h_spacer)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EM", data.major_harm_row, colorize=True)
     pdf.ln(gap_between_tables)
@@ -316,7 +319,7 @@ def build_relative_comparison_pdf(
     pdf.set_font("helvetica", "", 8)
     if show_root_row:
         row_line("Raíz", data.minor_degrees_notes, bold_cells=True)
-        row_line("", [""] * 7, band_fill=True)
+        row_line("", [""] * 7, band_fill=True, row_h=h_spacer)
     row_line("Grados", list(ROMAN_HEADER), bold_cells=True)
     row_line("EmN", data.minor_emn, colorize=True)
     row_line("EmA", data.minor_ema_display, colorize=True)
