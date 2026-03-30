@@ -387,7 +387,7 @@ def quality_fill_rgb(token: str) -> tuple[int, int, int]:
     t = (token or "").strip()
     if t in ("—", "-", "–", "\u2014"):
         # Gris de repetición un poco más claro para impresión en papel.
-        return (170, 181, 198)
+        return (184, 194, 210)
     if t == "M":
         return (143, 209, 143)
     if t == "m":
