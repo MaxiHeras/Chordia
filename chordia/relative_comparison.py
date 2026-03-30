@@ -386,7 +386,8 @@ def quality_fill_rgb(token: str) -> tuple[int, int, int]:
     """RGB 0–255 para relleno de celdas en PDF (misma leyenda que la web)."""
     t = (token or "").strip()
     if t in ("—", "-", "–", "\u2014"):
-        return (120, 130, 145)
+        # Gris de repetición un poco más claro para impresión en papel.
+        return (152, 164, 181)
     if t == "M":
         return (143, 209, 143)
     if t == "m":
