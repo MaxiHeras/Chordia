@@ -299,13 +299,20 @@ def _render_pdf_controls(
     *,
     show_print_mode: bool = True,
     generate_label: str = "📥 Generar PDF de Selección",
+    print_mode_label: str = "Modo de impresión PDF:",
+    print_mode_key: str = "pdf_print_mode",
+    print_mode_options: tuple[str, ...] = ("one_per_page", "continuous"),
+    print_mode_format_func: Callable[[str], str] | None = None,
 ) -> None:
     if show_print_mode:
+        mode_format = print_mode_format_func or (
+            lambda x: "Una hoja por tipo (por defecto)" if x == "one_per_page" else "Continuo (varios tipos por hoja)"
+        )
         st.radio(
-            "Modo de impresión PDF:",
-            options=["one_per_page", "continuous"],
-            format_func=lambda x: "Una hoja por tipo (por defecto)" if x == "one_per_page" else "Continuo (varios tipos por hoja)",
-            key="pdf_print_mode",
+            print_mode_label,
+            options=list(print_mode_options),
+            format_func=mode_format,
+            key=print_mode_key,
             horizontal=False,
         )
         st.write("")
@@ -466,13 +473,22 @@ def render_sidebar(
         def _build_rel_pdf() -> bytes | None:
             maj = st.session_state.get("rel_comp_maj_root", "C")
             mn = st.session_state.get("rel_comp_min_root", "A")
-            return build_relative_comparison_pdf(maj, mn, _app_public_url())
+            return build_relative_comparison_pdf(
+                maj,
+                mn,
+                _app_public_url(),
+                print_mode=st.session_state.get("rel_pdf_print_mode", "current_view"),
+            )
 
         _render_pdf_controls(
             _build_rel_pdf,
             f"Relativas_{st.session_state.get('rel_comp_maj_root', 'C')}_{st.session_state.get('rel_comp_min_root', 'A')}.pdf",
-            show_print_mode=False,
-            generate_label="📥 Generar PDF (vista actual)",
+            show_print_mode=True,
+            generate_label="📥 Generar PDF de Selección",
+            print_mode_label="Modo de impresión PDF:",
+            print_mode_key="rel_pdf_print_mode",
+            print_mode_options=("current_view", "without_root"),
+            print_mode_format_func=lambda x: "Vista actual (por defecto)" if x == "current_view" else "Imprimir sin raíz",
         )
         render_share_section()
         _render_mobile_view_mode_switch()

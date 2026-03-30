@@ -223,7 +223,12 @@ def build_scales_pdf(
     return pdf.output()
 
 
-def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_url: str) -> bytes:
+def build_relative_comparison_pdf(
+    major_root: str,
+    minor_root: str,
+    app_public_url: str,
+    print_mode: str = "current_view",
+) -> bytes:
     """Una página con tablas mayor / menor relativas (como la vista principal)."""
     data = build_comparison_data(major_root, minor_root)
     pdf = ChordiaPDF(app_public_url, orientation="P", unit="mm", format="A4")
@@ -280,20 +285,26 @@ def build_relative_comparison_pdf(major_root: str, minor_root: str, app_public_u
                 pdf.cell(cell_w, h_row, txt, border=1, align="C", fill=False)
         pdf.ln(h_row)
 
-    pdf.set_font("helvetica", "B", 11)
-    pdf.cell(0, 7, "Tonalidad mayor", ln=True)
-    pdf.set_font("helvetica", "", 8)
-    row_line("Raíz", data.major_degrees_notes)
-    row_line("", [""] * 7, band_fill=True)
-    row_line("Grados", list(ROMAN_HEADER))
-    row_line("EM", data.major_harm_row, colorize=True)
-    pdf.ln(5)
+    show_root_row = print_mode != "without_root"
+    title_h = 7 if show_root_row else 6
+    gap_between_tables = 5 if show_root_row else 3
 
     pdf.set_font("helvetica", "B", 11)
-    pdf.cell(0, 7, "Tonalidad menor (relativa)", ln=True)
+    pdf.cell(0, title_h, "Tonalidad mayor", ln=True)
     pdf.set_font("helvetica", "", 8)
-    row_line("Raíz", data.minor_degrees_notes)
-    row_line("", [""] * 7, band_fill=True)
+    if show_root_row:
+        row_line("Raíz", data.major_degrees_notes)
+        row_line("", [""] * 7, band_fill=True)
+    row_line("Grados", list(ROMAN_HEADER))
+    row_line("EM", data.major_harm_row, colorize=True)
+    pdf.ln(gap_between_tables)
+
+    pdf.set_font("helvetica", "B", 11)
+    pdf.cell(0, title_h, "Tonalidad menor (relativa)", ln=True)
+    pdf.set_font("helvetica", "", 8)
+    if show_root_row:
+        row_line("Raíz", data.minor_degrees_notes)
+        row_line("", [""] * 7, band_fill=True)
     row_line("Grados", list(ROMAN_HEADER))
     row_line("EmN", data.minor_emn, colorize=True)
     row_line("EmA", data.minor_ema_display, colorize=True)
